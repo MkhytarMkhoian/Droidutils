@@ -119,7 +119,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             mUrlConnection.setFixedLengthStreamingMode(request.getHttpBody().getContentLength());
 
             DataOutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
-            out.writeBytes(request.getHttpBody());
+            out.writeBytes(request.getHttpBody().convertToString());
             out.flush();
             out.close();
 

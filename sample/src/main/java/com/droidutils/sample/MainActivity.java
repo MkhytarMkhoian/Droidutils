@@ -2,10 +2,12 @@ package com.droidutils.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import com.droidutils.backstack.BackStack;
+import com.droidutils.jsonparser.JsonConverter;
 
 import static com.droidutils.backstack.ActionType.DO_SOMETHING;
 import static com.droidutils.backstack.ActionType.GO_BACK;
@@ -19,11 +21,13 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBackStack.addFragmentContainerId(MainActivity.class, R.id.container);
-        mBackStack.setFragmentBackButtonActionType(Fragment2.class, GO_BACK);
-        mBackStack.setFragmentBackButtonActionType(Fragment1.class, DO_SOMETHING);
-
-        FragmentManagerUtils.showFragment(Fragment1.class, getSupportFragmentManager(), null, true);
+        JsonConverter<Body> converter = new JsonConverter<Body>();
+        try {
+            String s = converter.convertToJsonString(new Body());
+            Log.e("convert", s);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 

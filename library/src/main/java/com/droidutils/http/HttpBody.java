@@ -24,6 +24,11 @@ public class HttpBody<T> {
 
     public String convertToString(){
 
+        try {
+            return new JsonConverter<T>().convertToJsonString(mBody);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return null;
     }
 }

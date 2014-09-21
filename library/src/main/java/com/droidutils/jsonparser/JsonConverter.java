@@ -10,11 +10,14 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Mkhitar on 17.09.2014.
  */
 public class JsonConverter<T> implements AbstractJsonConverter<T> {
+
+    private Object mGlobal;
 
     @Override
     public T readJson(JSONObject jsonObject) throws JSONException {
@@ -22,13 +25,25 @@ public class JsonConverter<T> implements AbstractJsonConverter<T> {
     }
 
     @Override
-    public String convertToJsonString(T object) throws Exception {
+    public String convertToJsonString(Object object) throws Exception {
         JSONStringer jsonStringer = new JSONStringer();
+        mGlobal = object;
+        return parseObject(object, jsonStringer);
+    }
+
+    private String parseObject(Object object, JSONStringer jsonStringer) throws Exception {
         Class<?> clazz = object.getClass();
         Field[] fields = clazz.getDeclaredFields();
 
         if (Collection.class.isAssignableFrom(clazz)) {
-            writeArray(((Collection) object).toArray(), jsonStringer, null);
+
+            if (fields.length > 0){
+                jsonStringer.object();
+                readObject(object, jsonStringer, clazz.getAnnotation(JsonKey.class).value());
+            } else {
+                readObject(object, jsonStringer, "");
+            }
+
         } else {
             jsonStringer.object();
         }
@@ -38,78 +53,89 @@ public class JsonConverter<T> implements AbstractJsonConverter<T> {
 
             JsonKey jsonKey = field.getAnnotation(JsonKey.class);
             if (jsonKey != null) {
-                Class type = field.getType();
-
-                if (type.isPrimitive() || String.class.isAssignableFrom(type)) {
-                    jsonStringer.key(jsonKey.value()).value(field.get(object));
-                } else if (type.isArray()) {
-                    writeArray(field.get(object), jsonStringer, jsonKey.value());
-                } else {
-                    jsonStringer.key(jsonKey.value()).value(field.get(object));
-                }
-
+                readObject(field.get(object), jsonStringer, jsonKey.value());
             }
         }
         if (Collection.class.isAssignableFrom(clazz)) {
-            jsonStringer.endArray();
+            if (fields.length > 0){
+                jsonStringer.endObject();
+            } else {
+                jsonStringer.endArray();
+            }
         } else {
             jsonStringer.endObject();
+
+            if (Collection.class.isAssignableFrom(mGlobal.getClass())) {
+                if (mGlobal.getClass().getDeclaredFields().length > 0){
+                    jsonStringer.endObject();
+                } else {
+                    jsonStringer.endArray();
+                }
+            }
         }
         return jsonStringer.toString();
     }
 
-    private Object[] writeArray(Object array, JSONStringer jsonStringer, String key) throws JSONException {
+    private Object[] convertToObjectArray(Object array) throws JSONException {
         Object[] array2 = new Object[Array.getLength(array)];
-        if (array2.length > 0) {
-            if (key != null) {
-                jsonStringer.key(key);
-            }
-            jsonStringer.array();
-        }
+
         for (int i = 0; i < array2.length; i++) {
             array2[i] = Array.get(array, i);
-            jsonStringer.value(array2[i]);
-        }
-        if (array2.length > 0) {
-            jsonStringer.endArray();
         }
         return array2;
     }
 
-    private void writeObject(JSONStringer jsonStringer, Field field, String arrayKey) throws JSONException {
-        jsonStringer.object();
-
-        jsonStringer.endObject();
-    }
-
-    private static void jsonify(Object object, JSONStringer jsonStringer) throws JSONException {
+    private void readObject(Object object, JSONStringer jsonStringer, String key) throws Exception {
         if (object instanceof Map) {
-            jsonStringer.object();
-            for (String key : ((Map<String, Object>) object).keySet()) {
-                jsonStringer.key(key);
-                jsonify((((Map<String, Object>) object)).get(key), jsonStringer);
+
+            Set<String> keys = ((Map<String, Object>) object).keySet();
+            for (String key2 : keys) {
+                Object o = ((Map<String, Object>) object).get(key);
+                readObject(o, jsonStringer, key2);
             }
-            jsonStringer.endObject();
-        } else if (object instanceof Object[]) {
+        } else if (object instanceof Object[]
+                || object instanceof int[]
+                || object instanceof double[]
+                || object instanceof boolean[]
+                || object instanceof short[]
+                || object instanceof float[]
+                || object instanceof byte[]
+                || object instanceof long[]
+                || object instanceof char[]) {
+
+            if (!key.isEmpty()) {
+                jsonStringer.key(key);
+            }
             jsonStringer.array();
-            for (Object o : (Object[]) object) jsonify(o, jsonStringer);
+
+            Object[] objects = convertToObjectArray(object);
+            for (Object o : objects) readObject(o, jsonStringer, "");
             jsonStringer.endArray();
+
         } else if (object instanceof Collection) {
-            jsonify(((Collection) object).toArray(), jsonStringer);
-        } else if (object instanceof String) {
+            readObject(((Collection) object).toArray(), jsonStringer, key);
+
+        } else if (object instanceof String
+                || object instanceof Boolean
+                || object instanceof Number
+                || object instanceof Character) {
+
+            if (!key.isEmpty()) {
+                jsonStringer.key(key);
+            }
             jsonStringer.value(object);
-        } else if (object instanceof Boolean) {
-            jsonStringer.value(object);
-        } else if (object instanceof Integer) {
-            jsonStringer.value(object);
-        } else if (object instanceof Double) {
-            jsonStringer.value(object);
-        } else if (object instanceof Long) {
-            jsonStringer.value(object);
+
+        } else if (object != null && !object.getClass().getName().equals(Object.class.getName())) {
+            if (!key.isEmpty()){
+                jsonStringer.key(key);
+            }
+            parseObject(object, jsonStringer);
+
         } else if (object == null) {
+            jsonStringer.key(key);
             jsonStringer.value(JSONObject.NULL);
         } else {
-            throw new RuntimeException("Unexpected jsonify value: " + object);
+            throw new RuntimeException("Unexpected readObject value: " + object);
         }
     }
 }
