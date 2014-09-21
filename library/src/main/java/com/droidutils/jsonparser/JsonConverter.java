@@ -60,18 +60,18 @@ public class JsonConverter<T> implements AbstractJsonConverter<T> {
             if (fields.length > 0){
                 jsonStringer.endObject();
             } else {
-                jsonStringer.endArray();
+//                jsonStringer.endArray();
             }
         } else {
             jsonStringer.endObject();
 
-            if (Collection.class.isAssignableFrom(mGlobal.getClass())) {
-                if (mGlobal.getClass().getDeclaredFields().length > 0){
-                    jsonStringer.endObject();
-                } else {
-                    jsonStringer.endArray();
-                }
-            }
+//            if (Collection.class.isAssignableFrom(mGlobal.getClass())) {
+//                if (mGlobal.getClass().getDeclaredFields().length > 0){
+//                    jsonStringer.endObject();
+//                } else {
+//                   // jsonStringer.endArray();
+//                }
+//            }
         }
         return jsonStringer.toString();
     }
