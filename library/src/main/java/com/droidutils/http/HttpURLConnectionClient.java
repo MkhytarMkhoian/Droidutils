@@ -41,14 +41,14 @@ public class HttpURLConnectionClient implements HttpConnection {
         return mUrlConnection;
     }
 
-    private JSONObject parseResponse(int status, InputStream in) throws Exception {
+    private String parseResponse(int status, InputStream in) throws Exception {
         if (status != HttpURLConnection.HTTP_OK) {
             in = mUrlConnection.getErrorStream();
             String error = readStream(in);
             throw new IllegalArgumentException(error);
         } else {
             String response = readStream(in);
-            return new JSONObject(response);
+            return response;
         }
     }
 
@@ -87,7 +87,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public JSONObject get(Request request) throws Exception {
+    public String get(Request request) throws Exception {
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -102,7 +102,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public JSONObject post(Request request) throws Exception {
+    public String post(Request request) throws Exception {
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -132,7 +132,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public JSONObject put(Request request) throws Exception {
+    public String put(Request request) throws Exception {
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -144,7 +144,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public JSONObject head(Request request) throws Exception {
+    public String head(Request request) throws Exception {
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -157,7 +157,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public JSONObject delete(Request request) throws Exception {
+    public String delete(Request request) throws Exception {
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -170,7 +170,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public JSONObject trace(Request request) throws Exception {
+    public String trace(Request request) throws Exception {
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -183,7 +183,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public JSONObject options(Request request) throws Exception {
+    public String options(Request request) throws Exception {
 
         try {
             mUrlConnection = getHttpURLConnection(request);

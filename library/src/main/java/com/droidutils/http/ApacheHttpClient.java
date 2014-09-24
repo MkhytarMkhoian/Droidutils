@@ -10,37 +10,37 @@ import org.json.JSONObject;
 public class ApacheHttpClient implements HttpConnection {
 
     @Override
-    public JSONObject get(Request request) {
+    public String get(Request request) {
         return null;
     }
 
     @Override
-    public JSONObject post(Request request) {
+    public String post(Request request) {
         return null;
     }
 
     @Override
-    public JSONObject put(Request request) {
+    public String put(Request request) {
         return null;
     }
 
     @Override
-    public JSONObject head(Request request) {
+    public String head(Request request) {
         return null;
     }
 
     @Override
-    public JSONObject delete(Request request) {
+    public String delete(Request request) {
         return null;
     }
 
     @Override
-    public JSONObject trace(Request request) {
+    public String trace(Request request) {
         return null;
     }
 
     @Override
-    public JSONObject options(Request request) {
+    public String options(Request request) {
         return null;
     }
 }

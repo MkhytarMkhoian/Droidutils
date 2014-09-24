@@ -9,11 +9,11 @@ import org.json.JSONObject;
  */
 public interface HttpConnection {
 
-    public JSONObject get(Request request) throws Exception;
-    public JSONObject post(Request request)throws Exception;
-    public JSONObject put(Request request)throws Exception;
-    public JSONObject head(Request request)throws Exception;
-    public JSONObject delete(Request request)throws Exception;
-    public JSONObject trace(Request request)throws Exception;
-    public JSONObject options(Request request)throws Exception;
+    public String get(Request request) throws Exception;
+    public String post(Request request)throws Exception;
+    public String put(Request request)throws Exception;
+    public String head(Request request)throws Exception;
+    public String delete(Request request)throws Exception;
+    public String trace(Request request)throws Exception;
+    public String options(Request request)throws Exception;
 }

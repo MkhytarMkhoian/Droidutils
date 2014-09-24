@@ -15,9 +15,9 @@ public class HttpExecutor {
         mHttpConnection = httpConnection;
     }
 
-    public JSONObject execute(Request request) throws Exception {
+    public String execute(Request request) throws Exception {
 
-        JSONObject result = null;
+        String result = null;
 
         switch (request.getHttpMethod()) {
 
