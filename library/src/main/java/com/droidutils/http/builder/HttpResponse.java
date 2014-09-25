@@ -32,4 +32,8 @@ public class HttpResponse<T> {
     public Map<String, List<String>> getHeaders(){
         return mResponseHeaders;
     }
+
+    public String getHeader(String key){
+        return mResponseHeaders.get(key).get(0);
+    }
 }
