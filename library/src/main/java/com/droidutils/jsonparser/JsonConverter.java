@@ -19,9 +19,12 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Set;
 
 /**
@@ -82,7 +85,8 @@ public class JsonConverter {
                     Type typeArgument = type2.getActualTypeArguments()[0];
                     Class<?> typeArgClass = (Class<?>) typeArgument;
 
-                    Collection collection = new ArrayList();
+                    Collection collection = getCollectionInstance(field.getType());
+
                     if (Number.class.isAssignableFrom(typeArgClass)
                             || String.class.isAssignableFrom(typeArgClass)
                             || Character.class.isAssignableFrom(typeArgClass)){
@@ -138,144 +142,17 @@ public class JsonConverter {
         }
     }
 
-    private Map<Class<?>, Object> map = new HashMap<Class<?>, Object>();
+   private Collection getCollectionInstance(Class<?> type){
 
-    public <T> T get(Class<T> clazz) {
-        return clazz.cast(map.get(clazz));
-    }
-
-    public <T> void put(Class<T> clazz, T favorite) {
-        map.put(clazz, favorite);
-    }
-
-    //////////
-
-    public <T> T readJson(InputStream in, Class<T> responseType) throws Exception {
-
-        T response = responseType.newInstance();
-
-        JsonReader reader = new JsonReader(new InputStreamReader(in, "UTF-8"));
-
-        startReadJson(reader, response);
-
-        return response;
-    }
-
-    private <T> void startReadJson(JsonReader reader, T response) throws Exception {
-
-        Field[] fields = response.getClass().getDeclaredFields();
-        Map<String, Field> keysMap = new HashMap<String, Field>(fields.length);
-
-        for (Field field : fields) {
-            JsonKey key = field.getAnnotation(JsonKey.class);
-            if (key != null) {
-                field.setAccessible(true);
-                keysMap.put(key.value(), field);
-
-                if (!field.getType().isPrimitive()
-                        && !Collection.class.isAssignableFrom(field.getType())
-                        && !Map.class.isAssignableFrom(field.getType())) {
-
-                    field.set(response, field.getType().newInstance());
-                }
-
-            }
-        }
-        readRecursivelyJsonObject(reader, keysMap, response, null);
-    }
-
-    private <T> void readRecursivelyJsonObject(JsonReader reader, Map<String, Field> fields, T response, Field field) throws Exception {
-        JsonToken jsonToken = reader.peek();
-
-        switch (jsonToken) {
-
-            case BEGIN_ARRAY:
-                if (field == null) {
-                    reader.skipValue();
-                } else {
-                    reader.beginArray();
-                    while (reader.hasNext()) {
-                        readRecursivelyJsonObject(reader, fields, response, field);
-                    }
-                    reader.endArray();
-                }
-                break;
-            case BEGIN_OBJECT:
-
-                reader.beginObject();
-                while (reader.hasNext()) {
-                    readRecursivelyJsonObject(reader, fields, response, field);
-                }
-                reader.endObject();
-
-                break;
-            case BOOLEAN:
-                if (field == null) {
-                    reader.skipValue();
-                } else {
-                    field.setBoolean(response, reader.nextBoolean());
-                }
-
-                break;
-            case END_ARRAY:
-
-                break;
-            case END_DOCUMENT:
-
-                break;
-            case END_OBJECT:
-
-                break;
-            case NAME:
-                field = fields.get(reader.nextName());
-
-                if (Collection.class.isAssignableFrom(field.getType())) {
-                    Type type = field.getGenericType();
-                    if (ParameterizedType.class.isAssignableFrom(type.getClass())) {
-                        ParameterizedType type2 = (ParameterizedType) type;
-                        Type typeArgument = type2.getActualTypeArguments()[0];
-                        Class typeArgClass = (Class) typeArgument;
-
-                        startReadJson(reader, typeArgClass.newInstance());
-                    }
-                } else {
-                    readRecursivelyJsonObject(reader, fields, response, field);
-                }
-                break;
-            case NULL:
-                reader.nextNull();
-                break;
-            case NUMBER:
-
-                if (field == null) {
-                    reader.skipValue();
-                } else {
-                    String value = reader.nextString();
-                    Class<?> type = field.getType();
-
-                    if (type == double.class) {
-                        field.setDouble(response, Double.valueOf(value));
-                    } else if (type == int.class) {
-                        field.setInt(response, Integer.valueOf(value));
-                    } else if (type == long.class) {
-                        field.setLong(response, Long.valueOf(value));
-                    }
-                }
-                break;
-            case STRING:
-                if (field == null) {
-                    reader.skipValue();
-                } else {
-                    String s = reader.nextString();
-                    field.set(response, s);
-                }
-                break;
-            default:
-                throw new IllegalArgumentException();
-        }
-    }
-
-    ////////
+       if (List.class.isAssignableFrom(type)){
+           return new ArrayList();
+       } else if (Set.class.isAssignableFrom(type)){
+           return new HashSet();
+       } else if (Queue.class.isAssignableFrom(type)){
+           return new PriorityQueue();
+       }
+       return null;
+   }
 
     public String convertToJsonString(Object object) throws Exception {
         JSONStringer jsonStringer = new JSONStringer();

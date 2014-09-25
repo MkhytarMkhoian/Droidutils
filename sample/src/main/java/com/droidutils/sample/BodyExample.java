@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public class BodyExample {
     private String title;
 
     @JsonKey("properties")
-    private List<Integer> properties = new ArrayList<Integer>();
+    private LinkedList<Integer> properties = new LinkedList<Integer>();
 
     @JsonKey("required")
     private String[] r;
