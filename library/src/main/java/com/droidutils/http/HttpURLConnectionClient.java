@@ -1,8 +1,7 @@
 package com.droidutils.http;
 
-import com.droidutils.http.builder.Request;
-
-import org.json.JSONObject;
+import com.droidutils.http.builder.HttpRequest;
+import com.droidutils.http.builder.HttpResponse;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -27,29 +26,30 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     public static final int READ_TIMEOUT = 20 * 1000;
     public static final int CONNECT_TIMEOUT = 30 * 1000;
-    public static final String CHARSET = "UTF-8";
 
-    HttpURLConnection mUrlConnection;
+    private HttpURLConnection mUrlConnection;
 
-    public HttpURLConnection getHttpURLConnection(Request request) throws Exception{
-        URL url = new URL(request.getUrl());
+    public HttpURLConnection getHttpURLConnection(HttpRequest httpRequest) throws Exception {
+        URL url = new URL(httpRequest.getUrl());
         CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
         mUrlConnection = (HttpURLConnection) url.openConnection();
-        mUrlConnection.setReadTimeout(request.getReadTimeout());
-        mUrlConnection.setConnectTimeout(request.getConnectTimeout());
+        mUrlConnection.setReadTimeout(httpRequest.getReadTimeout());
+        mUrlConnection.setConnectTimeout(httpRequest.getConnectTimeout());
 
         return mUrlConnection;
     }
 
-    private String parseResponse(int status, InputStream in) throws Exception {
+    private <T> HttpResponse parseResponse(Class<T> responseType, InputStream in) throws Exception {
+        String response = null;
+        int status = mUrlConnection.getResponseCode();
         if (status != HttpURLConnection.HTTP_OK) {
             in = mUrlConnection.getErrorStream();
             String error = readStream(in);
-            throw new IllegalArgumentException(error);
+            throw new Exception(error);
         } else {
-            String response = readStream(in);
-            return response;
+            response = readStream(in);
         }
+        return new HttpResponse<T>(response, mUrlConnection.getHeaderFields(), responseType);
     }
 
     private void addHeaders(HttpURLConnection mUrlConnection, List<HttpHeader> headers) {
@@ -87,26 +87,29 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public String get(Request request) throws Exception {
+    public <T> HttpResponse get(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(request);
-
+            mUrlConnection = getHttpURLConnection(httpRequest);
             mUrlConnection.setRequestProperty("Accept-Charset", CHARSET);
+
+            if (httpRequest.isHaveHeaders()) {
+                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            }
+            mUrlConnection.connect();
+
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
-            int status = mUrlConnection.getResponseCode();
-            return parseResponse(status, in);
+            return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
         }
     }
 
     @Override
-    public String post(Request request) throws Exception {
+    public <T> HttpResponse post(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(request);
-
+            mUrlConnection = getHttpURLConnection(httpRequest);
             mUrlConnection.setRequestMethod(HttpMethod.POST.toString());
             mUrlConnection.setUseCaches(false);
             mUrlConnection.setDoOutput(true);
@@ -114,42 +117,72 @@ public class HttpURLConnectionClient implements HttpConnection {
             mUrlConnection.setRequestProperty("Accept-Charset", CHARSET);
             mUrlConnection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
 
-            addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
+            if (httpRequest.isHaveHeaders()) {
+                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            }
+            mUrlConnection.setFixedLengthStreamingMode(httpRequest.getHttpBody().getContentLength());
+            mUrlConnection.connect();
 
-            mUrlConnection.setFixedLengthStreamingMode(request.getHttpBody().getContentLength());
-
-            DataOutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
-            out.writeBytes(request.getHttpBody().convertToString());
-            out.flush();
-            out.close();
+            if (httpRequest.isHaveBody()){
+                DataOutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
+                out.writeBytes(httpRequest.getHttpBody().convertToString());
+                out.flush();
+                out.close();
+            }
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
-            int status = mUrlConnection.getResponseCode();
-            return parseResponse(status, in);
+            return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
         }
     }
 
     @Override
-    public String put(Request request) throws Exception {
+    public <T> HttpResponse put(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(request);
+            mUrlConnection = getHttpURLConnection(httpRequest);
+            mUrlConnection.setRequestProperty("Accept", "application/json");
+            mUrlConnection.setRequestProperty("Content-Type", "application/json");
             mUrlConnection.setRequestMethod(HttpMethod.PUT.toString());
-            return null;
+            mUrlConnection.setDoOutput(true);
+
+            if (httpRequest.isHaveHeaders()) {
+                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            }
+            mUrlConnection.connect();
+
+            if (httpRequest.isHaveBody()){
+                DataOutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
+                out.writeBytes(httpRequest.getHttpBody().convertToString());
+                out.flush();
+                out.close();
+            }
+
+            InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
+            return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
         }
     }
 
     @Override
-    public String head(Request request) throws Exception {
+    public <T> HttpResponse head(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(request);
+            mUrlConnection = getHttpURLConnection(httpRequest);
             mUrlConnection.setRequestMethod(HttpMethod.HEAD.toString());
-            return null;
+            mUrlConnection.setDoOutput(true);
+            mUrlConnection.setDefaultUseCaches(false);
+            mUrlConnection.setRequestProperty("Accept-Language", "en-US");
+
+            if (httpRequest.isHaveHeaders()) {
+                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            }
+            mUrlConnection.connect();
+
+            InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
+            return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
         }
@@ -157,12 +190,22 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public String delete(Request request) throws Exception {
+    public <T> HttpResponse delete(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(request);
+            mUrlConnection = getHttpURLConnection(httpRequest);
+            mUrlConnection.setRequestProperty(
+                    "Content-Type", "application/x-www-form-urlencoded");
             mUrlConnection.setRequestMethod(HttpMethod.DELETE.toString());
-            return null;
+            mUrlConnection.setDoOutput(true);
+
+            if (httpRequest.isHaveHeaders()) {
+                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            }
+            mUrlConnection.connect();
+
+            InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
+            return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
         }
@@ -170,12 +213,20 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public String trace(Request request) throws Exception {
+    public <T> HttpResponse trace(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(request);
+            mUrlConnection = getHttpURLConnection(httpRequest);
             mUrlConnection.setRequestMethod(HttpMethod.TRACE.toString());
-            return null;
+
+            HttpHeaders headers = httpRequest.getHttpHeaders();
+            if (headers != null) {
+                addHeaders(mUrlConnection, headers.getHeaders());
+            }
+            mUrlConnection.connect();
+
+            InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
+            return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
         }
@@ -183,11 +234,18 @@ public class HttpURLConnectionClient implements HttpConnection {
     }
 
     @Override
-    public String options(Request request) throws Exception {
+    public <T> HttpResponse options(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(request);
+            mUrlConnection = getHttpURLConnection(httpRequest);
             mUrlConnection.setRequestMethod(HttpMethod.OPTIONS.toString());
+
+            HttpHeaders headers = httpRequest.getHttpHeaders();
+            if (headers != null) {
+                addHeaders(mUrlConnection, headers.getHeaders());
+            }
+            mUrlConnection.connect();
+
             return null;
         } finally {
             mUrlConnection.disconnect();

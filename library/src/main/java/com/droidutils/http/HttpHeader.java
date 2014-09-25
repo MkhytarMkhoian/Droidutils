@@ -22,4 +22,5 @@ public class HttpHeader implements Header {
     public String getValue() {
         return mValue;
     }
+
 }

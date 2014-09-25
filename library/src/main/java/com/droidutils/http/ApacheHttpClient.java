@@ -1,46 +1,46 @@
 package com.droidutils.http;
 
-import com.droidutils.http.builder.Request;
-
-import org.json.JSONObject;
+import com.droidutils.http.builder.HttpRequest;
+import com.droidutils.http.builder.HttpResponse;
 
 /**
  * Created by Misha on 08.09.2014.
  */
 public class ApacheHttpClient implements HttpConnection {
 
+
     @Override
-    public String get(Request request) {
+    public <T> HttpResponse get(HttpRequest httpRequest, Class<T> responseType) throws Exception {
         return null;
     }
 
     @Override
-    public String post(Request request) {
+    public <T> HttpResponse post(HttpRequest httpRequest, Class<T> responseType) throws Exception {
         return null;
     }
 
     @Override
-    public String put(Request request) {
+    public <T> HttpResponse put(HttpRequest httpRequest, Class<T> responseType) throws Exception {
         return null;
     }
 
     @Override
-    public String head(Request request) {
+    public <T> HttpResponse head(HttpRequest httpRequest, Class<T> responseType) throws Exception {
         return null;
     }
 
     @Override
-    public String delete(Request request) {
+    public <T> HttpResponse delete(HttpRequest httpRequest, Class<T> responseType) throws Exception {
         return null;
     }
 
     @Override
-    public String trace(Request request) {
+    public <T> HttpResponse trace(HttpRequest httpRequest, Class<T> responseType) throws Exception {
         return null;
     }
 
     @Override
-    public String options(Request request) {
+    public <T> HttpResponse options(HttpRequest httpRequest, Class<T> responseType) throws Exception {
         return null;
     }
 }

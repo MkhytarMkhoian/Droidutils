@@ -2,6 +2,8 @@ package com.droidutils.http;
 
 import com.droidutils.jsonparser.JsonConverter;
 
+import java.net.URLEncoder;
+
 /**
  * Created by Misha on 07.09.2014.
  */
@@ -17,15 +19,15 @@ public class HttpBody<T> {
         return 0;
     }
 
-    public Byte[] convertToByteArray(){
+    public byte[] convertToByteArray() throws Exception{
 
-        return null;
+        return new JsonConverter().convertToJsonString(mBody).getBytes(HttpConnection.CHARSET);
     }
 
     public String convertToString(){
 
         try {
-            return new JsonConverter().convertToJsonString(mBody);
+            return URLEncoder.encode(new JsonConverter().convertToJsonString(mBody), HttpConnection.CHARSET);
         } catch (Exception e) {
             e.printStackTrace();
         }

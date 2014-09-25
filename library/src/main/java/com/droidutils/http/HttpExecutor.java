@@ -1,8 +1,7 @@
 package com.droidutils.http;
 
-import com.droidutils.http.builder.Request;
-
-import org.json.JSONObject;
+import com.droidutils.http.builder.HttpRequest;
+import com.droidutils.http.builder.HttpResponse;
 
 /**
  * Created by Misha on 08.09.2014.
@@ -15,32 +14,32 @@ public class HttpExecutor {
         mHttpConnection = httpConnection;
     }
 
-    public String execute(Request request) throws Exception {
+    public <T> HttpResponse execute(HttpRequest httpRequest, Class<T> responseType) throws Exception {
 
-        String result = null;
+        HttpResponse result = null;
 
-        switch (request.getHttpMethod()) {
+        switch (httpRequest.getHttpMethod()) {
 
             case GET:
-                result = mHttpConnection.get(request);
+                result = mHttpConnection.get(httpRequest, responseType);
                 break;
             case POST:
-                result = mHttpConnection.post(request);
+                result = mHttpConnection.post(httpRequest, responseType);
                 break;
             case HEAD:
-                result = mHttpConnection.head(request);
+                result = mHttpConnection.head(httpRequest, responseType);
                 break;
             case OPTIONS:
-                result = mHttpConnection.options(request);
+                result = mHttpConnection.options(httpRequest, responseType);
                 break;
             case PUT:
-                result = mHttpConnection.put(request);
+                result = mHttpConnection.put(httpRequest, responseType);
                 break;
             case DELETE:
-                result = mHttpConnection.delete(request);
+                result = mHttpConnection.delete(httpRequest, responseType);
                 break;
             case TRACE:
-                result = mHttpConnection.trace(request);
+                result = mHttpConnection.trace(httpRequest, responseType);
                 break;
         }
         return result;
