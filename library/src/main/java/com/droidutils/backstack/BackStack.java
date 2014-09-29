@@ -12,16 +12,15 @@ import java.util.Map;
  */
 public class BackStack {
 
+    public static final int ACTIVITY_FINISH = 1;
+    public static final int GO_BACK = 2;
+
     private static BackStack sInstance = null;
 
-    private BackStackListener mBackStackListener;
-    private Map<String, Integer> mFragmentContainerId;
-    private Map<String, ActionType> mFragmentsBackButtonActionType;
+    private GoBackListener mListener;
 
     private BackStack() {
 
-        mFragmentContainerId = new HashMap<String, Integer>();
-        mFragmentsBackButtonActionType = new HashMap<String, ActionType>();
     }
 
     public static BackStack getInstance() {
@@ -37,45 +36,18 @@ public class BackStack {
         sInstance = null;
     }
 
-    private int getFragmentBackStackSize(FragmentManager fragmentManager) {
-        return fragmentManager.getBackStackEntryCount();
+    public void clear(){
+        mListener = null;
     }
 
+    public void captureFocus(GoBackListener listener){
+        mListener = listener;
+    }
 
-    public <T extends Activity, F extends Fragment> void doAction(Class<T> clazz, FragmentManager fragmentManager, int flag) {
-
-        if (getFragmentBackStackSize(fragmentManager) > 0) {
-
-            Fragment fragment = fragmentManager.findFragmentById(mFragmentContainerId.get(clazz.getName()));
-
-            if (fragment != null) {
-
-                ActionType actionType = mFragmentsBackButtonActionType.get(fragment.getClass().getName());
-
-                if (actionType == ActionType.GO_BACK) {
-                    fragmentManager.popBackStack();
-                } else {
-                    if (mBackStackListener != null) {
-                        mBackStackListener.onAction(flag);
-                    }
-                }
-            }
+    public void goBack(int flag){
+        if (mListener != null){
+            mListener.onBackPressed(flag);
         }
     }
-
-    public void setActionListener(BackStackListener backStackListener) {
-        this.mBackStackListener = backStackListener;
-    }
-
-    public <T extends Activity> void addFragmentContainerId(Class<T> clazz, int containerId) {
-
-        mFragmentContainerId.put(clazz.getName(), containerId);
-    }
-
-    public <T extends Fragment> void setFragmentBackButtonActionType(Class<T> clazz, ActionType actionType) {
-
-        mFragmentsBackButtonActionType.put(clazz.getName(), actionType);
-    }
-
 }
 

@@ -1,8 +1,5 @@
 package com.droidutils.jsonparser;
 
-import android.util.JsonReader;
-import android.util.JsonToken;
-
 import com.droidutils.jsonparser.annotation.JsonKey;
 
 import org.json.JSONArray;
@@ -10,8 +7,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONStringer;
 
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -69,7 +64,7 @@ public class JsonConverter {
 
     private <T> void readRecursively(Object object, Map<String, Field> fields, String key, T responseObject) throws Exception {
 
-       if (object instanceof JSONObject) {
+        if (object instanceof JSONObject) {
 
             Field field = fields.get(key);
 
@@ -89,7 +84,7 @@ public class JsonConverter {
 
                     if (Number.class.isAssignableFrom(typeArgClass)
                             || String.class.isAssignableFrom(typeArgClass)
-                            || Character.class.isAssignableFrom(typeArgClass)){
+                            || Character.class.isAssignableFrom(typeArgClass)) {
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             collection.add(jsonArray.opt(i));
@@ -109,7 +104,7 @@ public class JsonConverter {
                 Class<?> componentClass = type.getComponentType();
                 Object result = Array.newInstance(componentClass, sourceLength);
 
-                if (componentClass.isPrimitive() || String.class.isAssignableFrom(componentClass)){
+                if (componentClass.isPrimitive() || String.class.isAssignableFrom(componentClass)) {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         Array.set(result, i, jsonArray.opt(i));
                     }
@@ -142,17 +137,17 @@ public class JsonConverter {
         }
     }
 
-   private Collection getCollectionInstance(Class<?> type){
+    private Collection getCollectionInstance(Class<?> type) {
 
-       if (List.class.isAssignableFrom(type)){
-           return new ArrayList();
-       } else if (Set.class.isAssignableFrom(type)){
-           return new HashSet();
-       } else if (Queue.class.isAssignableFrom(type)){
-           return new PriorityQueue();
-       }
-       return null;
-   }
+        if (List.class.isAssignableFrom(type)) {
+            return new ArrayList();
+        } else if (Set.class.isAssignableFrom(type)) {
+            return new HashSet();
+        } else if (Queue.class.isAssignableFrom(type)) {
+            return new PriorityQueue();
+        }
+        return null;
+    }
 
     public String convertToJsonString(Object object) throws Exception {
         JSONStringer jsonStringer = new JSONStringer();

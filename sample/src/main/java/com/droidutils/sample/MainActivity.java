@@ -1,6 +1,8 @@
 package com.droidutils.sample;
 
+import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -17,6 +19,10 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        getSupportFragmentManager().beginTransaction().replace(R.id.container, new Fragment1(), Fragment1.class.getName())
+                .addToBackStack(Fragment1.class.getName())
+                .commit();
 
         JsonConverter converter = new JsonConverter();
         try {
@@ -39,8 +45,8 @@ public class MainActivity extends ActionBarActivity {
                     "}";
 
             JsonConverter converter2 = new JsonConverter();
-            BodyExample bodyExample = converter2.readJson(response, BodyExample.class);
-            Log.e("convert", bodyExample.toString());
+//            BodyExample bodyExample = converter2.readJson(response, BodyExample.class);
+//            Log.e("convert", bodyExample.toString());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -74,6 +80,6 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-
+        mBackStack.goBack(BackStack.ACTIVITY_FINISH);
     }
 }

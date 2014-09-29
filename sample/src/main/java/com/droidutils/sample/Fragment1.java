@@ -8,17 +8,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
-
-import com.droidutils.backstack.ActionType;
 import com.droidutils.backstack.BackStack;
-import com.droidutils.backstack.BackStackListener;
-
-import static com.droidutils.backstack.ActionType.*;
+import com.droidutils.backstack.GoBackListener;
 
 /**
  * Created by Misha on 04.07.2014.
  */
-public class Fragment1 extends Fragment implements BackStackListener{
+public class Fragment1 extends Fragment implements GoBackListener {
 
     private BackStack mBackStack = BackStack.getInstance();
     private Button mButton;
@@ -31,18 +27,28 @@ public class Fragment1 extends Fragment implements BackStackListener{
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentManagerUtils.showFragment(Fragment2.class, getFragmentManager(), null, true);
+
+                getActivity().getSupportFragmentManager().beginTransaction().replace(R.id.container, new Fragment2(), Fragment2.class.getName())
+                        .addToBackStack(Fragment2.class.getName())
+                        .commit();
             }
         });
 
 
-        mBackStack.setActionListener(this);
         return v;
 
     }
 
     @Override
-    public void onAction(int flag) {
-        Toast.makeText(getActivity(), "onAction1", Toast.LENGTH_SHORT).show();
+    public void onBackPressed(int flag) {
+
+        Toast.makeText(getActivity(), "onAction1 flag" + flag, Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mBackStack.captureFocus(this);
     }
 }
