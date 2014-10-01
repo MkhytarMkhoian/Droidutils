@@ -137,15 +137,20 @@ public class JsonConverter {
         }
     }
 
-    private Collection getCollectionInstance(Class<?> type) {
+    private Collection getCollectionInstance(Class<?> type) throws Exception {
 
-        if (List.class.isAssignableFrom(type)) {
-            return new ArrayList();
-        } else if (Set.class.isAssignableFrom(type)) {
-            return new HashSet();
-        } else if (Queue.class.isAssignableFrom(type)) {
-            return new PriorityQueue();
+        if (type.isInterface()){
+            if (List.class.isAssignableFrom(type)) {
+                return new ArrayList();
+            } else if (Set.class.isAssignableFrom(type)) {
+                return new HashSet();
+            } else if (Queue.class.isAssignableFrom(type)) {
+                return new PriorityQueue();
+            }
+        } else {
+            return (Collection) type.newInstance();
         }
+
         return null;
     }
 

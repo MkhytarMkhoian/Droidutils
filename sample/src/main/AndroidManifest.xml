@@ -16,6 +16,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".backstack.BackStackExampleActivity"
+            android:label="@string/title_activity_back_stack" >
+        </activity>
+        <activity
+            android:name=".http.HttpExampleActivity"
+            android:label="@string/title_activity_http_example" >
+        </activity>
+        <activity
+            android:name=".json.JsonExampleActivity"
+            android:label="@string/title_activity_json_example" >
+        </activity>
     </application>
 
 </manifest>
