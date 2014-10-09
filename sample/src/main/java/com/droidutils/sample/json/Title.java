@@ -12,6 +12,6 @@ public class Title {
 
     @Override
     public String toString() {
-        return name;
+        return "Name : " + name;
     }
 }

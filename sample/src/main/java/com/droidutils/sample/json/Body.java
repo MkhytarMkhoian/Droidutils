@@ -1,7 +1,6 @@
 package com.droidutils.sample.json;
 
 import com.droidutils.jsonparser.annotation.JsonKey;
-import com.droidutils.sample.Test;
 
 import java.util.ArrayList;
 import java.util.HashMap;

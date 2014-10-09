@@ -1,11 +1,9 @@
 package com.droidutils.sample.backstack;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 
-import com.droidutils.backstack.BackButtonPressed;
+import com.droidutils.backstack.BackButtonListener;
 import com.droidutils.backstack.BackStack;
 import com.droidutils.sample.R;
 
@@ -31,7 +29,8 @@ public class BackStackExampleActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-        mBackStack.onBackPressed();
+        mBackStack.onBackPressed(getFragmentManager(), R.id.container);
     }
+
 
 }

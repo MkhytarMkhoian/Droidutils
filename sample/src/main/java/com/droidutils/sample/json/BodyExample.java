@@ -2,13 +2,16 @@ package com.droidutils.sample.json;
 
 import com.droidutils.jsonparser.annotation.JsonKey;
 
+import java.util.Arrays;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Created by Mkhitar on 22.09.2014.
  */
 public class BodyExample {
+
+    @JsonKey("test")
+    private String test;
 
     @JsonKey("type")
     private String type;
@@ -19,10 +22,10 @@ public class BodyExample {
     private LinkedList<Title> properties;
 
     @JsonKey("required")
-    private List<String> r;
+    private String[] required;
 
     @Override
     public String toString() {
-        return type + " " + title + " " + properties.toString() + " " + r.toString();
+        return "test : " + test + " \n" + "type : " + type + " \n" + "title : " + title + " \n" + "properties : " + properties.toString() + " \n" + "required : " + Arrays.toString(required);
     }
 }

@@ -62,16 +62,6 @@ public class ExecutorHelper {
         });
     }
 
-    public static <V> V doNetworkTaskSync(Callable<V> task, long timeout, TimeUnit unit) throws InterruptedException,
-            ExecutionException,
-            TimeoutException {
-        if (task != null) {
-            Future<V> future = mNetworkExecutor.submit(task);
-            return future.get(timeout, unit);
-        }
-        return null;
-    }
-
     public static ScheduledFuture<?> doTaskWithInterval(Runnable command,
                                                         long initialDelay,
                                                         long period,

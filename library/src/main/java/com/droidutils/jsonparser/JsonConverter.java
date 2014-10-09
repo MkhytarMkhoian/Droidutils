@@ -64,11 +64,7 @@ public class JsonConverter {
 
     private <T> void readRecursively(Object object, Map<String, Field> fields, String key, T responseObject) throws Exception {
 
-        if (object instanceof JSONObject) {
-
-            Field field = fields.get(key);
-
-        } else if (object instanceof JSONArray) {
+        if (object instanceof JSONArray) {
 
             Field field = fields.get(key);
             JSONArray jsonArray = (JSONArray) object;
@@ -139,7 +135,7 @@ public class JsonConverter {
 
     private Collection getCollectionInstance(Class<?> type) throws Exception {
 
-        if (type.isInterface()){
+        if (type.isInterface()) {
             if (List.class.isAssignableFrom(type)) {
                 return new ArrayList();
             } else if (Set.class.isAssignableFrom(type)) {
