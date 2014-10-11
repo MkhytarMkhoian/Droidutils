@@ -10,8 +10,11 @@ import java.util.LinkedList;
  */
 public class BodyExample {
 
+//    @JsonKey("object")
+//    private Ignore object;
+
     @JsonKey("test")
-    private String test;
+    private String ignore;
 
     @JsonKey("type")
     private String type;
@@ -26,6 +29,6 @@ public class BodyExample {
 
     @Override
     public String toString() {
-        return "test : " + test + " \n" + "type : " + type + " \n" + "title : " + title + " \n" + "properties : " + properties.toString() + " \n" + "required : " + Arrays.toString(required);
+        return "test : " + ignore + " \n" + "type : " + type + " \n" + "title : " + title + " \n" + "properties : " + properties.toString() + " \n" + "required : " + Arrays.toString(required);
     }
 }

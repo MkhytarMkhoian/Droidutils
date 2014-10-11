@@ -36,15 +36,10 @@ public class JsonConverter {
 
     private <T> T readFromJson(JSONObject json, Class<T> responseType) throws Exception {
 
-        T responseObject = responseType.newInstance();
-        Iterator jsonKeysIterator = json.keys();
         List<String> jsonKeys = new ArrayList<String>();
+        setKeys(json, jsonKeys);
 
-        while (jsonKeysIterator.hasNext()) {
-            String key = (String) jsonKeysIterator.next();
-            jsonKeys.add(key);
-        }
-
+        T responseObject = responseType.newInstance();
         Field[] fields = responseObject.getClass().getDeclaredFields();
         Map<String, Field> responseObjKeys = new HashMap<String, Field>(fields.length);
 
@@ -53,20 +48,41 @@ public class JsonConverter {
             if (key != null) {
                 field.setAccessible(true);
                 responseObjKeys.put(key.value(), field);
-
-                if (jsonKeys.contains(key.value())) {
-                    readRecursively(json.get(key.value()), responseObjKeys, key.value(), responseObject);
-                }
             }
         }
+
+        for (String key : jsonKeys) {
+            read(json.get(key), responseObjKeys, key, responseObject);
+        }
+
         return responseObject;
     }
 
-    private <T> void readRecursively(Object object, Map<String, Field> fields, String key, T responseObject) throws Exception {
+    private <T> void read(Object object, Map<String, Field> fields, String key, T responseObject) throws Exception {
 
-        if (object instanceof JSONArray) {
+        if (object instanceof JSONObject) {
+
+            JSONObject jsonObject = (JSONObject) object;
+            Field field = fields.get(key);
+            if (field == null) {
+
+                Iterator jsonKeysIterator = jsonObject.keys();
+                while (jsonKeysIterator.hasNext()) {
+                    String innerKey = (String) jsonKeysIterator.next();
+                    read(jsonObject.get(innerKey), fields, innerKey, responseObject);
+                }
+                return;
+            }
+
+            Class<?> type = field.getType();
+            field.set(responseObject, readFromJson(jsonObject, type));
+
+        } else if (object instanceof JSONArray) {
 
             Field field = fields.get(key);
+            if (field == null) {
+                return;
+            }
             JSONArray jsonArray = (JSONArray) object;
 
             if (Collection.class.isAssignableFrom(field.getType())) {
@@ -114,22 +130,40 @@ public class JsonConverter {
             }
 
         } else if (object instanceof String) {
-            fields.get(key).set(responseObject, object);
+            if (fields.get(key) != null) {
+                fields.get(key).set(responseObject, object);
+            }
 
         } else if (object instanceof Boolean) {
-            fields.get(key).setBoolean(responseObject, (Boolean) object);
+            if (fields.get(key) != null) {
+                fields.get(key).setBoolean(responseObject, (Boolean) object);
+            }
 
         } else if (object instanceof Integer) {
-            fields.get(key).setInt(responseObject, (Integer) object);
+            if (fields.get(key) != null) {
+                fields.get(key).setInt(responseObject, (Integer) object);
+            }
 
         } else if (object instanceof Double) {
-            fields.get(key).setDouble(responseObject, (Double) object);
+            if (fields.get(key) != null) {
+                fields.get(key).setDouble(responseObject, (Double) object);
+            }
 
         } else if (object instanceof Long) {
-            fields.get(key).setLong(responseObject, (Long) object);
-
+            if (fields.get(key) != null) {
+                fields.get(key).setLong(responseObject, (Long) object);
+            }
         } else {
             throw new RuntimeException("Unexpected readObject value: " + object);
+        }
+    }
+
+    private void setKeys(JSONObject jsonObject, List<String> keys) {
+
+        Iterator jsonKeysIterator = jsonObject.keys();
+        while (jsonKeysIterator.hasNext()) {
+            String key = (String) jsonKeysIterator.next();
+            keys.add(key);
         }
     }
 

@@ -26,12 +26,6 @@ public class ExecutorHelper {
     private static ExecutorService mNetworkExecutor = Executors.newFixedThreadPool(DEFAULT_THREADS);
     private static ScheduledExecutorService mScheduledExecutorService = Executors.newScheduledThreadPool(DEFAULT_SCHEDULED_THREADS);
 
-    public static void doInBackground(Runnable runnable) {
-        if (runnable != null) {
-            mThreadPoolExecutor.execute(runnable);
-        }
-    }
-
     public static <R> void notifyStartListener(final ExecutorListener<R> listener) {
         Handler handler = new Handler(Looper.getMainLooper());
         handler.post(new Runnable() {
