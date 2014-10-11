@@ -10,24 +10,22 @@ import java.net.URLEncoder;
 public class HttpBody<T> {
 
     private T mBody;
+    private JsonConverter mJsonConverter;
 
     public HttpBody(T body){
         mBody = body;
+        mJsonConverter = new JsonConverter();
     }
 
-    public int getContentLength(){
-        return 0;
-    }
+    public byte[] convertToByteArray() throws Exception {
 
-    public byte[] convertToByteArray() throws Exception{
-
-        return new JsonConverter().convertToJsonString(mBody).getBytes(HttpConnection.CHARSET);
+        return mJsonConverter.convertToJsonString(mBody).getBytes(HttpConnection.CHARSET);
     }
 
     public String convertToString(){
 
         try {
-            return URLEncoder.encode(new JsonConverter().convertToJsonString(mBody), HttpConnection.CHARSET);
+            return URLEncoder.encode(mJsonConverter.convertToJsonString(mBody), HttpConnection.CHARSET);
         } catch (Exception e) {
             e.printStackTrace();
         }

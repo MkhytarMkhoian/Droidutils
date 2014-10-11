@@ -8,5 +8,6 @@
     <string name="title_activity_http_example">HttpExampleActivity</string>
     <string name="title_activity_json_example">JsonExampleActivity</string>
     <string name="title_activity_example">ExampleActivity</string>
+    <string name="send_request">Send Request</string>
 
 </resources>

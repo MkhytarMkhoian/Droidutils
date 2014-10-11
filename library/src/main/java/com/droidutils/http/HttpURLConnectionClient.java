@@ -10,6 +10,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -120,12 +121,16 @@ public class HttpURLConnectionClient implements HttpConnection {
             if (httpRequest.isHaveHeaders()) {
                 addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
             }
-            mUrlConnection.setFixedLengthStreamingMode(httpRequest.getHttpBody().getContentLength());
+
+            if (httpRequest.isHaveBody()){
+                mUrlConnection.setFixedLengthStreamingMode(httpRequest.getHttpBody().convertToByteArray().length);
+            }
+
             mUrlConnection.connect();
 
             if (httpRequest.isHaveBody()){
-                DataOutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
-                out.writeBytes(httpRequest.getHttpBody().convertToString());
+                OutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
+                out.write(httpRequest.getHttpBody().convertToByteArray());
                 out.flush();
                 out.close();
             }
@@ -174,7 +179,6 @@ public class HttpURLConnectionClient implements HttpConnection {
             mUrlConnection.setRequestMethod(HttpMethod.HEAD.toString());
             mUrlConnection.setDoOutput(true);
             mUrlConnection.setDefaultUseCaches(false);
-            mUrlConnection.setRequestProperty("Accept-Language", "en-US");
 
             if (httpRequest.isHaveHeaders()) {
                 addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());

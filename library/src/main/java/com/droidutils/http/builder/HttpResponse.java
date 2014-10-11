@@ -34,6 +34,10 @@ public class HttpResponse<T> {
     }
 
     public String getHeader(String key){
-        return mResponseHeaders.get(key).get(0);
+
+        if (mResponseHeaders.get(key) != null){
+            return mResponseHeaders.get(key).get(0);
+        }
+        return null;
     }
 }

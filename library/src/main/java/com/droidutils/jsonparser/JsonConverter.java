@@ -218,19 +218,9 @@ public class JsonConverter {
         if (Collection.class.isAssignableFrom(clazz)) {
             if (fields.length > 0) {
                 jsonStringer.endObject();
-            } else {
-//                jsonStringer.endArray();
             }
         } else {
-            jsonStringer.endObject(); // TO - DO
-
-//            if (Collection.class.isAssignableFrom(mGlobal.getClass())) {
-//                if (mGlobal.getClass().getDeclaredFields().length > 0){
-//                    jsonStringer.endObject();
-//                } else {
-//                   // jsonStringer.endArray();
-//                }
-//            }
+            jsonStringer.endObject();
         }
         return jsonStringer.toString();
     }
