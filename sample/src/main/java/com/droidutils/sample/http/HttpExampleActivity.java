@@ -8,14 +8,18 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.droidutils.multithreading.ThreadExecutor;
+import com.droidutils.http.HttpBody;
+import com.droidutils.http.HttpMethod;
+import com.droidutils.http.builder.HttpRequest;
+import com.droidutils.http.cache.Cache;
 import com.droidutils.multithreading.ExecutorListener;
+import com.droidutils.multithreading.ThreadExecutor;
 import com.droidutils.sample.R;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-public class HttpExampleActivity extends ActionBarActivity {
+public class HttpExampleActivity extends ActionBarActivity implements View.OnClickListener {
 
     private Button mSendRequestBtn;
     private ProgressDialog mProgressDialog;
@@ -29,44 +33,20 @@ public class HttpExampleActivity extends ActionBarActivity {
         mProgressDialog.setMessage("Loading");
 
         mSendRequestBtn = (Button) findViewById(R.id.send_request_button);
-        mSendRequestBtn.setOnClickListener(new View.OnClickListener() {
+        mSendRequestBtn.setOnClickListener(this);
+
+        HttpRequest<String> httpRequest = new HttpRequest<String>();
+        httpRequest.setHttpBody(new HttpBody<Integer>(1));
+        httpRequest.setHttpMethod(HttpMethod.GET);
+        httpRequest.setCache(new Cache<String>() {
             @Override
-            public void onClick(View v) {
+            public void syncCache(String data, int requestKey) {
 
-                Callable<String> callable = new Callable<String>() {
-                    @Override
-                    public String call() throws Exception {
+            }
 
-                        Thread.sleep(3000);
-
-                        return "Hello world";
-                    }
-                };
-                ThreadExecutor.doBackgroundTaskAsync(callable, new ExecutorListener<String>() {
-                    @Override
-                    public void start() {
-                        mProgressDialog.show();
-                    }
-
-                    @Override
-                    public void complete(String result) {
-                        mProgressDialog.dismiss();
-                        Toast.makeText(HttpExampleActivity.this, result, Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void error(Exception e) {
-                        e.printStackTrace();
-                        mProgressDialog.dismiss();
-                    }
-                });
-
-                ThreadExecutor.doTaskWithInterval(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.e("doTaskWithInterval", "Hello world With Interval");
-                    }
-                }, 0, 1, TimeUnit.SECONDS);
+            @Override
+            public String readFromCache(int requestKey) {
+                return null;
             }
         });
     }
@@ -75,5 +55,43 @@ public class HttpExampleActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
         ThreadExecutor.shutdownTaskWithInterval();
+    }
+
+    @Override
+    public void onClick(View v) {
+        Callable<String> callable = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+
+                Thread.sleep(3000);
+
+                return "Hello world";
+            }
+        };
+        ThreadExecutor.doBackgroundTaskAsync(callable, new ExecutorListener<String>() {
+            @Override
+            public void start() {
+                mProgressDialog.show();
+            }
+
+            @Override
+            public void complete(String result) {
+                mProgressDialog.dismiss();
+                Toast.makeText(HttpExampleActivity.this, result, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void error(Exception e) {
+                e.printStackTrace();
+                mProgressDialog.dismiss();
+            }
+        });
+
+        ThreadExecutor.doTaskWithInterval(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("doTaskWithInterval", "Hello world With Interval");
+            }
+        }, 0, 1, TimeUnit.SECONDS);
     }
 }

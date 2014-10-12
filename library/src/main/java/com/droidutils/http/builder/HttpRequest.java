@@ -2,13 +2,13 @@ package com.droidutils.http.builder;
 
 import com.droidutils.http.HttpBody;
 import com.droidutils.http.HttpHeaders;
-import com.droidutils.http.HttpURLConnectionClient;
 import com.droidutils.http.HttpMethod;
+import com.droidutils.http.cache.Cache;
 
 /**
  * Created by Misha on 07.09.2014.
  */
-public class HttpRequest {
+public class HttpRequest<T> {
 
     private HttpHeaders mHttpHeaders;
     private String mUrl;
@@ -16,56 +16,45 @@ public class HttpRequest {
     private HttpMethod mHttpMethod;
     private int mReadTimeout;
     private int mConnectTimeout;
+    private int mRequestKey;
+    private Cache<T> mCache;
 
-    private HttpRequest(Builder builder) {
-        mHttpHeaders = builder.mHttpHeaders;
-        mUrl = builder.mUrl;
-        mHttpBody = builder.mHttpBody;
-        mHttpMethod = builder.mHttpMethod;
-        mReadTimeout = builder.mReadTimeout;
-        mConnectTimeout = builder.mConnectTimeout;
+    public HttpRequest() {
+
     }
 
-    public static class Builder<T> {
+    public void setHttpHeaders(HttpHeaders httpHeaders) {
+        this.mHttpHeaders = httpHeaders;
+    }
 
-        private HttpHeaders mHttpHeaders;
-        private String mUrl;
-        private HttpBody mHttpBody;
-        private HttpMethod mHttpMethod;
-        private int mReadTimeout = HttpURLConnectionClient.READ_TIMEOUT;
-        private int mConnectTimeout = HttpURLConnectionClient.CONNECT_TIMEOUT;
+    public void setUrl(String url) {
+        this.mUrl = url;
+    }
 
-        public Builder() {
+    public void setHttpBody(HttpBody httpBody) {
+        this.mHttpBody = httpBody;
+    }
 
-        }
+    public void setHttpMethod(HttpMethod httpMethod) {
+        this.mHttpMethod = httpMethod;
+    }
 
-        public void setHttpHeaders(HttpHeaders httpHeaders) {
-            this.mHttpHeaders = httpHeaders;
-        }
+    public void setReadTimeout(int readTimeout) {
+        this.mReadTimeout = readTimeout;
+    }
 
-        public void setUrl(String url) {
-            this.mUrl = url;
-        }
+    public void setConnectTimeout(int connectTimeout) {
+        this.mConnectTimeout = connectTimeout;
 
-        public void setHttpBody(HttpBody httpBody) {
-            this.mHttpBody = httpBody;
-        }
+    }
 
-        public void setHttpMethod(HttpMethod httpMethod) {
-            this.mHttpMethod = httpMethod;
-        }
+    public void setRequestKey(int requestKey) {
+        this.mRequestKey = requestKey;
+    }
 
-        public void setReadTimeout(int readTimeout) {
-            this.mReadTimeout = readTimeout;
-        }
+    public void setCache(Cache<T> cache) {
+        this.mCache = cache;
 
-        public void setConnectTimeout(int connectTimeout) {
-            this.mConnectTimeout = connectTimeout;
-        }
-
-        public HttpRequest build() {
-            return new HttpRequest(this);
-        }
     }
 
     public HttpHeaders getHttpHeaders() {
@@ -92,19 +81,21 @@ public class HttpRequest {
         return mConnectTimeout;
     }
 
-    public boolean isHaveBody(){
-
-        if (mHttpBody == null){
-            return false;
-        }
-        return true;
+    public int getRequestKey() {
+        return mRequestKey;
     }
 
-    public boolean isHaveHeaders(){
+    public Cache<T> getCache() {
+        return mCache;
+    }
 
-        if (mHttpHeaders == null){
-            return false;
-        }
-        return true;
+    public boolean isHaveBody() {
+
+        return mHttpBody != null;
+    }
+
+    public boolean isHaveHeaders() {
+
+        return mHttpHeaders != null;
     }
 }

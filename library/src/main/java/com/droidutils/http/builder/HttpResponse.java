@@ -10,22 +10,16 @@ import java.util.Map;
  */
 public class HttpResponse<T> {
 
-    private String mResponseBody;
+    private T mResponseBody;
     private Map<String, List<String>> mResponseHeaders;
-    private Class<T> mResponseType;
 
-    public HttpResponse(String responseBody, Map<String, List<String>> responseHeaders, Class<T> responseType) {
+    public HttpResponse(T responseBody, Map<String, List<String>> responseHeaders) {
         mResponseBody = responseBody;
         mResponseHeaders = responseHeaders;
-        mResponseType = responseType;
     }
 
     public T getBody() throws Exception {
 
-        return new JsonConverter().readJson(mResponseBody, mResponseType);
-    }
-
-    public String getBodyToString(){
         return mResponseBody;
     }
 
