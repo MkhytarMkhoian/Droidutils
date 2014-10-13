@@ -2,6 +2,7 @@ package com.droidutils.http;
 
 import com.droidutils.http.builder.HttpRequest;
 import com.droidutils.http.builder.HttpResponse;
+import com.droidutils.http.cache.Cache;
 
 /**
  * Created by Misha on 08.09.2014.
@@ -10,11 +11,17 @@ public interface HttpConnection {
 
     public static final String CHARSET = "UTF-8";
 
-    public <T> HttpResponse get(HttpRequest httpRequest, Class<T> responseType) throws Exception;
-    public <T> HttpResponse post(HttpRequest httpRequest, Class<T> responseType)throws Exception;
-    public <T> HttpResponse put(HttpRequest httpRequest, Class<T> responseType)throws Exception;
-    public <T> HttpResponse head(HttpRequest httpRequest, Class<T> responseType)throws Exception;
-    public <T> HttpResponse delete(HttpRequest httpRequest, Class<T> responseType)throws Exception;
-    public <T> HttpResponse trace(HttpRequest httpRequest, Class<T> responseType)throws Exception;
-    public <T> HttpResponse options(HttpRequest httpRequest, Class<T> responseType)throws Exception;
+    public <T> HttpResponse<T> get(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception;
+
+    public <T> HttpResponse<T> post(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception;
+
+    public <T> HttpResponse<T> put(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception;
+
+    public <T> HttpResponse<T> head(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception;
+
+    public <T> HttpResponse<T> delete(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception;
+
+    public <T> HttpResponse<T> trace(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception;
+
+    public <T> HttpResponse<T> options(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception;
 }

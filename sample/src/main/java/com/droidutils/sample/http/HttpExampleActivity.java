@@ -35,20 +35,7 @@ public class HttpExampleActivity extends ActionBarActivity implements View.OnCli
         mSendRequestBtn = (Button) findViewById(R.id.send_request_button);
         mSendRequestBtn.setOnClickListener(this);
 
-        HttpRequest<String> httpRequest = new HttpRequest<String>();
-        httpRequest.setHttpBody(new HttpBody<Integer>(1));
-        httpRequest.setHttpMethod(HttpMethod.GET);
-        httpRequest.setCache(new Cache<String>() {
-            @Override
-            public void syncCache(String data, int requestKey) {
 
-            }
-
-            @Override
-            public String readFromCache(int requestKey) {
-                return null;
-            }
-        });
     }
 
     @Override

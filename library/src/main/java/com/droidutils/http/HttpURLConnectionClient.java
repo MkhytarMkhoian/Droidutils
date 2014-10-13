@@ -2,6 +2,7 @@ package com.droidutils.http;
 
 import com.droidutils.http.builder.HttpRequest;
 import com.droidutils.http.builder.HttpResponse;
+import com.droidutils.http.cache.Cache;
 import com.droidutils.jsonparser.JsonConverter;
 
 import java.io.BufferedInputStream;
@@ -20,6 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 
 /**
  * Created by Misha on 07.09.2014.
@@ -32,6 +34,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     private HttpURLConnection mUrlConnection;
     private RequestManager mRequestManager;
     private JsonConverter mJsonConverter;
+    static final Semaphore semaphore = new Semaphore(1);
 
     public HttpURLConnectionClient() {
         mRequestManager = new RequestManager();
@@ -56,7 +59,7 @@ public class HttpURLConnectionClient implements HttpConnection {
         return mUrlConnection;
     }
 
-    private <T> HttpResponse parseResponse(Class<T> responseType, InputStream in) throws Exception {
+    private <T> HttpResponse<T> parseResponse(Class<T> responseType, InputStream in) throws Exception {
         String response = null;
         int status = mUrlConnection.getResponseCode();
         if (status != HttpURLConnection.HTTP_OK) {
@@ -106,50 +109,71 @@ public class HttpURLConnectionClient implements HttpConnection {
         return response.toString();
     }
 
-    @Override
-    public <T> HttpResponse get(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    private <T> HttpResponse<T> syncWithCache(HttpResponse<T> response, Cache<T> cache, int requestKey) throws Exception {
 
-        if (!mRequestManager.checkRequestLimit(httpRequest.getRequestKey())) {
-
-            if (httpRequest.getCache() != null) {
-                T response = (T) httpRequest.getCache().readFromCache(httpRequest.getRequestKey());
-                return new HttpResponse<T>(response, null);
-            }
-
-            return new HttpResponse<T>(null, null);
+        if (cache != null) {
+            return new HttpResponse<T>(cache.syncCache(response.getBody(), requestKey), response.getHeaders());
         }
 
+        return response;
+    }
+
+    private <T> HttpResponse<T> getFromCache(int requestKey, Cache<T> cache) {
+        if (cache != null) {
+            T response = cache.readFromCache(requestKey);
+            return new HttpResponse<T>(response, null);
+        }
+
+        return new HttpResponse<T>(null, null);
+    }
+
+    public <T> HttpResponse get(HttpRequest request, Class<T> responseType) throws Exception {
+        return get(request, responseType, null);
+    }
+
+    @Override
+    public <T> HttpResponse<T> get(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
+
         try {
-            mUrlConnection = getHttpURLConnection(httpRequest);
+
+            if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
+
+                return getFromCache(request.getRequestKey(), cache);
+            }
+
+            mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestProperty("Accept-Charset", CHARSET);
 
-            if (httpRequest.isHaveHeaders()) {
-                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            if (request.isHaveHeaders()) {
+                addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
             mUrlConnection.connect();
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
-            return parseResponse(responseType, in);
+
+            HttpResponse<T> response = parseResponse(responseType, in);
+
+            return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
         }
     }
 
+    public <T> HttpResponse post(HttpRequest request, Class<T> responseType) throws Exception {
+        return post(request, responseType, null);
+    }
+
     @Override
-    public <T> HttpResponse post(HttpRequest httpRequest, Class<T> responseType) throws Exception {
-
-        if (!mRequestManager.checkRequestLimit(httpRequest.getRequestKey())) {
-
-            if (httpRequest.getCache() != null) {
-                T response = (T) httpRequest.getCache().readFromCache(httpRequest.getRequestKey());
-                return new HttpResponse<T>(response, null);
-            }
-
-            return new HttpResponse<T>(null, null);
-        }
+    public <T> HttpResponse<T> post(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(httpRequest);
+
+            if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
+
+                return getFromCache(request.getRequestKey(), cache);
+            }
+
+            mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestMethod(HttpMethod.POST.toString());
             mUrlConnection.setUseCaches(false);
             mUrlConnection.setDoOutput(true);
@@ -157,80 +181,87 @@ public class HttpURLConnectionClient implements HttpConnection {
             mUrlConnection.setRequestProperty("Accept-Charset", CHARSET);
             mUrlConnection.setRequestProperty(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
 
-            if (httpRequest.isHaveHeaders()) {
-                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            if (request.isHaveHeaders()) {
+                addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
 
-            if (httpRequest.isHaveBody()) {
-                mUrlConnection.setFixedLengthStreamingMode(httpRequest.getHttpBody().convertToByteArray().length);
+            if (request.isHaveBody()) {
+                mUrlConnection.setFixedLengthStreamingMode(request.getHttpBody().convertToByteArray().length);
             }
 
             mUrlConnection.connect();
 
-            if (httpRequest.isHaveBody()) {
+            if (request.isHaveBody()) {
                 OutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
-                out.write(httpRequest.getHttpBody().convertToByteArray());
+                out.write(request.getHttpBody().convertToByteArray());
                 out.flush();
                 out.close();
             }
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
-            return parseResponse(responseType, in);
+            HttpResponse<T> response = parseResponse(responseType, in);
+
+            return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
         }
     }
 
+    public <T> HttpResponse put(HttpRequest request, Class<T> responseType) throws Exception {
+        return put(request, responseType, null);
+    }
+
     @Override
-    public <T> HttpResponse put(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> put(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        if (!mRequestManager.checkRequestLimit(httpRequest.getRequestKey())) {
+        if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
 
-            if (httpRequest.getCache() != null) {
-                T response = (T) httpRequest.getCache().readFromCache(httpRequest.getRequestKey());
-                return new HttpResponse<T>(response, null);
-            }
-
-            return new HttpResponse<T>(null, null);
+            return getFromCache(request.getRequestKey(), cache);
         }
 
         try {
-            mUrlConnection = getHttpURLConnection(httpRequest);
+            mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestProperty("Accept", "application/json");
             mUrlConnection.setRequestProperty("Content-Type", "application/json");
             mUrlConnection.setRequestMethod(HttpMethod.PUT.toString());
             mUrlConnection.setDoOutput(true);
 
-            if (httpRequest.isHaveHeaders()) {
-                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            if (request.isHaveHeaders()) {
+                addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
             mUrlConnection.connect();
 
-            if (httpRequest.isHaveBody()) {
+            if (request.isHaveBody()) {
                 DataOutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
-                out.writeBytes(httpRequest.getHttpBody().convertToString());
+                out.writeBytes(request.getHttpBody().convertToString());
                 out.flush();
                 out.close();
             }
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
-            return parseResponse(responseType, in);
+            HttpResponse<T> response = parseResponse(responseType, in);
+
+            return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
         }
     }
 
+    public <T> HttpResponse head(HttpRequest request, Class<T> responseType) throws Exception {
+        return head(request, responseType, null);
+    }
+
     @Override
-    public <T> HttpResponse head(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> head(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(httpRequest);
+            mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestMethod(HttpMethod.HEAD.toString());
             mUrlConnection.setDoOutput(true);
             mUrlConnection.setDefaultUseCaches(false);
 
-            if (httpRequest.isHaveHeaders()) {
-                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            if (request.isHaveHeaders()) {
+                addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
             mUrlConnection.connect();
 
@@ -242,18 +273,22 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     }
 
+    public <T> HttpResponse delete(HttpRequest request, Class<T> responseType) throws Exception {
+        return delete(request, responseType, null);
+    }
+
     @Override
-    public <T> HttpResponse delete(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> delete(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(httpRequest);
+            mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestProperty(
                     "Content-Type", "application/x-www-form-urlencoded");
             mUrlConnection.setRequestMethod(HttpMethod.DELETE.toString());
             mUrlConnection.setDoOutput(true);
 
-            if (httpRequest.isHaveHeaders()) {
-                addHeaders(mUrlConnection, httpRequest.getHttpHeaders().getHeaders());
+            if (request.isHaveHeaders()) {
+                addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
             mUrlConnection.connect();
 
@@ -265,14 +300,18 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     }
 
+    public <T> HttpResponse trace(HttpRequest request, Class<T> responseType) throws Exception {
+        return trace(request, responseType, null);
+    }
+
     @Override
-    public <T> HttpResponse trace(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> trace(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(httpRequest);
+            mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestMethod(HttpMethod.TRACE.toString());
 
-            HttpHeaders headers = httpRequest.getHttpHeaders();
+            HttpHeaders headers = request.getHttpHeaders();
             if (headers != null) {
                 addHeaders(mUrlConnection, headers.getHeaders());
             }
@@ -286,14 +325,18 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     }
 
+    public <T> HttpResponse options(HttpRequest request, Class<T> responseType) throws Exception {
+        return options(request, responseType, null);
+    }
+
     @Override
-    public <T> HttpResponse options(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> options(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
         try {
-            mUrlConnection = getHttpURLConnection(httpRequest);
+            mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestMethod(HttpMethod.OPTIONS.toString());
 
-            HttpHeaders headers = httpRequest.getHttpHeaders();
+            HttpHeaders headers = request.getHttpHeaders();
             if (headers != null) {
                 addHeaders(mUrlConnection, headers.getHeaders());
             }
