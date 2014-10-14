@@ -20,7 +20,9 @@ import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -34,11 +36,12 @@ public class HttpURLConnectionClient implements HttpConnection {
     private HttpURLConnection mUrlConnection;
     private RequestManager mRequestManager;
     private JsonConverter mJsonConverter;
-    static final Semaphore semaphore = new Semaphore(1);
+    private Map<Integer, Semaphore> mRunningRequest;
 
     public HttpURLConnectionClient() {
         mRequestManager = new RequestManager();
         mJsonConverter = new JsonConverter();
+        mRunningRequest = new HashMap<Integer, Semaphore>();
     }
 
     public void setRequestLimit(int requestKey, long limit) {
@@ -127,12 +130,32 @@ public class HttpURLConnectionClient implements HttpConnection {
         return new HttpResponse<T>(null, null);
     }
 
+    private void acquire(int requestKey, Semaphore semaphore) throws InterruptedException {
+
+        if (!mRunningRequest.containsKey(requestKey)) {
+            mRunningRequest.put(requestKey, semaphore);
+            semaphore.acquire();
+        } else {
+            mRunningRequest.get(requestKey).acquire();
+        }
+    }
+
+    private void release(int requestKey) throws InterruptedException {
+
+        if (mRunningRequest.containsKey(requestKey)) {
+            mRunningRequest.remove(requestKey).release();
+        }
+    }
+
     public <T> HttpResponse get(HttpRequest request, Class<T> responseType) throws Exception {
         return get(request, responseType, null);
     }
 
     @Override
     public <T> HttpResponse<T> get(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
+
+        final Semaphore semaphore = new Semaphore(1);
+        acquire(request.getRequestKey(), semaphore);
 
         try {
 
@@ -156,6 +179,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
+            release(request.getRequestKey());
         }
     }
 
@@ -165,6 +189,9 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     @Override
     public <T> HttpResponse<T> post(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
+
+        final Semaphore semaphore = new Semaphore(1);
+        acquire(request.getRequestKey(), semaphore);
 
         try {
 
@@ -204,6 +231,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
+            release(request.getRequestKey());
         }
     }
 
@@ -214,12 +242,15 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> put(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
-
-            return getFromCache(request.getRequestKey(), cache);
-        }
+        final Semaphore semaphore = new Semaphore(1);
+        acquire(request.getRequestKey(), semaphore);
 
         try {
+
+            if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
+                return getFromCache(request.getRequestKey(), cache);
+            }
+
             mUrlConnection = getHttpURLConnection(request);
             mUrlConnection.setRequestProperty("Accept", "application/json");
             mUrlConnection.setRequestProperty("Content-Type", "application/json");
@@ -244,6 +275,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
+            release(request.getRequestKey());
         }
     }
 
@@ -253,6 +285,9 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     @Override
     public <T> HttpResponse<T> head(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
+
+        final Semaphore semaphore = new Semaphore(1);
+        acquire(request.getRequestKey(), semaphore);
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -269,6 +304,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
+            release(request.getRequestKey());
         }
 
     }
@@ -279,6 +315,9 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     @Override
     public <T> HttpResponse<T> delete(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
+
+        final Semaphore semaphore = new Semaphore(1);
+        acquire(request.getRequestKey(), semaphore);
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -296,6 +335,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
+            release(request.getRequestKey());
         }
 
     }
@@ -306,6 +346,9 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     @Override
     public <T> HttpResponse<T> trace(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
+
+        final Semaphore semaphore = new Semaphore(1);
+        acquire(request.getRequestKey(), semaphore);
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -321,6 +364,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
+            release(request.getRequestKey());
         }
 
     }
@@ -331,6 +375,9 @@ public class HttpURLConnectionClient implements HttpConnection {
 
     @Override
     public <T> HttpResponse<T> options(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
+
+        final Semaphore semaphore = new Semaphore(1);
+        acquire(request.getRequestKey(), semaphore);
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -345,6 +392,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return null;
         } finally {
             mUrlConnection.disconnect();
+            release(request.getRequestKey());
         }
 
     }
