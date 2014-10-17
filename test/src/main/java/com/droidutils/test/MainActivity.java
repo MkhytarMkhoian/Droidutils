@@ -1,4 +1,4 @@
-package com.droidutils.sample;
+package com.droidutils.test;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -9,10 +9,9 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.droidutils.backstack.BackStack;
-import com.droidutils.sample.backstack.BackStackExampleActivity;
-import com.droidutils.sample.http.HttpExampleActivity;
-import com.droidutils.sample.json.JsonExampleActivity;
+import com.droidutils.test.backstack.BackStackExampleActivity;
+import com.droidutils.test.http.HttpExampleActivity;
+import com.droidutils.test.json.JsonExampleActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
