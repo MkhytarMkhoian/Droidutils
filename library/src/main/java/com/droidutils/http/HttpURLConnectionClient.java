@@ -3,7 +3,9 @@ package com.droidutils.http;
 import com.droidutils.http.builder.HttpRequest;
 import com.droidutils.http.builder.HttpResponse;
 import com.droidutils.http.cache.Cache;
+import com.droidutils.http.exception.RequestLimitException;
 import com.droidutils.jsonparser.JsonConverter;
+import com.droidutils.multithreading.CustomSemaphore;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -36,12 +38,12 @@ public class HttpURLConnectionClient implements HttpConnection {
     private HttpURLConnection mUrlConnection;
     private RequestManager mRequestManager;
     private JsonConverter mJsonConverter;
-    private Map<Integer, Semaphore> mRunningRequest;
+    private CustomSemaphore mSemaphore;
 
     public HttpURLConnectionClient() {
         mRequestManager = new RequestManager();
         mJsonConverter = new JsonConverter();
-        mRunningRequest = new HashMap<Integer, Semaphore>();
+        mSemaphore = new CustomSemaphore();
     }
 
     public void setRequestLimit(int requestKey, long limit) {
@@ -121,30 +123,12 @@ public class HttpURLConnectionClient implements HttpConnection {
         return response;
     }
 
-    private <T> HttpResponse<T> getFromCache(int requestKey, Cache<T> cache) {
+    private <T> HttpResponse<T> getFromCache(int requestKey, Cache<T> cache) throws RequestLimitException {
         if (cache != null) {
             T response = cache.readFromCache(requestKey);
             return new HttpResponse<T>(response, null);
         }
-
-        return new HttpResponse<T>(null, null);
-    }
-
-    private void acquire(int requestKey, Semaphore semaphore) throws InterruptedException {
-
-        if (!mRunningRequest.containsKey(requestKey)) {
-            mRunningRequest.put(requestKey, semaphore);
-            semaphore.acquire();
-        } else {
-            mRunningRequest.get(requestKey).acquire();
-        }
-    }
-
-    private void release(int requestKey) throws InterruptedException {
-
-        if (mRunningRequest.containsKey(requestKey)) {
-            mRunningRequest.remove(requestKey).release();
-        }
+        throw new RequestLimitException();
     }
 
     public <T> HttpResponse get(HttpRequest request, Class<T> responseType) throws Exception {
@@ -154,13 +138,11 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> get(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        final Semaphore semaphore = new Semaphore(1);
-        acquire(request.getRequestKey(), semaphore);
+        mSemaphore.acquire(request.getRequestKey());
 
         try {
 
             if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
-
                 return getFromCache(request.getRequestKey(), cache);
             }
 
@@ -170,7 +152,6 @@ public class HttpURLConnectionClient implements HttpConnection {
             if (request.isHaveHeaders()) {
                 addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
-            mUrlConnection.connect();
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
 
@@ -179,7 +160,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
-            release(request.getRequestKey());
+            mSemaphore.release(request.getRequestKey());
         }
     }
 
@@ -190,13 +171,11 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> post(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        final Semaphore semaphore = new Semaphore(1);
-        acquire(request.getRequestKey(), semaphore);
+        mSemaphore.acquire(request.getRequestKey());
 
         try {
 
             if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
-
                 return getFromCache(request.getRequestKey(), cache);
             }
 
@@ -216,8 +195,6 @@ public class HttpURLConnectionClient implements HttpConnection {
                 mUrlConnection.setFixedLengthStreamingMode(request.getHttpBody().convertToByteArray().length);
             }
 
-            mUrlConnection.connect();
-
             if (request.isHaveBody()) {
                 OutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
                 out.write(request.getHttpBody().convertToByteArray());
@@ -231,7 +208,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
-            release(request.getRequestKey());
+            mSemaphore.release(request.getRequestKey());
         }
     }
 
@@ -242,8 +219,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> put(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        final Semaphore semaphore = new Semaphore(1);
-        acquire(request.getRequestKey(), semaphore);
+        mSemaphore.acquire(request.getRequestKey());
 
         try {
 
@@ -260,7 +236,6 @@ public class HttpURLConnectionClient implements HttpConnection {
             if (request.isHaveHeaders()) {
                 addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
-            mUrlConnection.connect();
 
             if (request.isHaveBody()) {
                 DataOutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
@@ -275,7 +250,7 @@ public class HttpURLConnectionClient implements HttpConnection {
             return syncWithCache(response, cache, request.getRequestKey());
         } finally {
             mUrlConnection.disconnect();
-            release(request.getRequestKey());
+            mSemaphore.release(request.getRequestKey());
         }
     }
 
@@ -286,8 +261,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> head(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        final Semaphore semaphore = new Semaphore(1);
-        acquire(request.getRequestKey(), semaphore);
+        mSemaphore.acquire(request.getRequestKey());
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -298,13 +272,12 @@ public class HttpURLConnectionClient implements HttpConnection {
             if (request.isHaveHeaders()) {
                 addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
-            mUrlConnection.connect();
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
             return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
-            release(request.getRequestKey());
+            mSemaphore.release(request.getRequestKey());
         }
 
     }
@@ -316,8 +289,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> delete(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        final Semaphore semaphore = new Semaphore(1);
-        acquire(request.getRequestKey(), semaphore);
+        mSemaphore.acquire(request.getRequestKey());
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -329,13 +301,12 @@ public class HttpURLConnectionClient implements HttpConnection {
             if (request.isHaveHeaders()) {
                 addHeaders(mUrlConnection, request.getHttpHeaders().getHeaders());
             }
-            mUrlConnection.connect();
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
             return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
-            release(request.getRequestKey());
+            mSemaphore.release(request.getRequestKey());
         }
 
     }
@@ -347,8 +318,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> trace(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        final Semaphore semaphore = new Semaphore(1);
-        acquire(request.getRequestKey(), semaphore);
+        mSemaphore.acquire(request.getRequestKey());
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -358,13 +328,12 @@ public class HttpURLConnectionClient implements HttpConnection {
             if (headers != null) {
                 addHeaders(mUrlConnection, headers.getHeaders());
             }
-            mUrlConnection.connect();
 
             InputStream in = new BufferedInputStream(mUrlConnection.getInputStream());
             return parseResponse(responseType, in);
         } finally {
             mUrlConnection.disconnect();
-            release(request.getRequestKey());
+            mSemaphore.release(request.getRequestKey());
         }
 
     }
@@ -376,8 +345,7 @@ public class HttpURLConnectionClient implements HttpConnection {
     @Override
     public <T> HttpResponse<T> options(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
 
-        final Semaphore semaphore = new Semaphore(1);
-        acquire(request.getRequestKey(), semaphore);
+        mSemaphore.acquire(request.getRequestKey());
 
         try {
             mUrlConnection = getHttpURLConnection(request);
@@ -387,12 +355,11 @@ public class HttpURLConnectionClient implements HttpConnection {
             if (headers != null) {
                 addHeaders(mUrlConnection, headers.getHeaders());
             }
-            mUrlConnection.connect();
 
             return null;
         } finally {
             mUrlConnection.disconnect();
-            release(request.getRequestKey());
+            mSemaphore.release(request.getRequestKey());
         }
 
     }

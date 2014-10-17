@@ -2,45 +2,45 @@ package com.droidutils.http;
 
 import com.droidutils.http.builder.HttpRequest;
 import com.droidutils.http.builder.HttpResponse;
+import com.droidutils.http.cache.Cache;
 
 /**
  * Created by Misha on 08.09.2014.
  */
 public class ApacheHttpClient implements HttpConnection {
 
-
     @Override
-    public <T> HttpResponse get(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> get(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
         return null;
     }
 
     @Override
-    public <T> HttpResponse post(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> post(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
         return null;
     }
 
     @Override
-    public <T> HttpResponse put(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> put(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
         return null;
     }
 
     @Override
-    public <T> HttpResponse head(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> head(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
         return null;
     }
 
     @Override
-    public <T> HttpResponse delete(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> delete(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
         return null;
     }
 
     @Override
-    public <T> HttpResponse trace(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> trace(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
         return null;
     }
 
     @Override
-    public <T> HttpResponse options(HttpRequest httpRequest, Class<T> responseType) throws Exception {
+    public <T> HttpResponse<T> options(HttpRequest request, Class<T> responseType, Cache<T> cache) throws Exception {
         return null;
     }
 }

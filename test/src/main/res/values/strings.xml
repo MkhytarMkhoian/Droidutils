@@ -8,6 +8,8 @@
     <string name="title_activity_http_example">HttpExampleActivity</string>
     <string name="title_activity_json_example">JsonExampleActivity</string>
     <string name="title_activity_example">ExampleActivity</string>
-    <string name="send_request">Send Request</string>
+    <string name="test_multi_threading">Test MultiThreading</string>
+    <string name="used_cache_button">Used Cache</string>
+    <string name="used_request_with_limit_button">Used Request With Limit</string>
 
 </resources>

@@ -14,6 +14,7 @@ public class Url {
         private StringBuilder mUrlBuilder;
 
         public Builder(String baseUrl){
+            mUrlBuilder = new StringBuilder();
             mUrlBuilder.append(baseUrl);
         }
 

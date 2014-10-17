@@ -42,6 +42,6 @@ public class RequestManager {
     }
 
     public void resetRequestLimit(int requestKey) {
-        mRequestLimit.put(requestKey, System.currentTimeMillis());
+        mRequestTimestamp.put(requestKey, System.currentTimeMillis());
     }
 }

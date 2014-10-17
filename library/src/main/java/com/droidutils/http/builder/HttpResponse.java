@@ -34,4 +34,19 @@ public class HttpResponse<T> {
         }
         return null;
     }
+
+    @Override
+    public String toString() {
+
+        StringBuilder builder = new StringBuilder();
+        if (mResponseBody != null){
+            builder.append("Body : ").append(mResponseBody.toString());
+        }
+        if (mResponseHeaders != null){
+            builder.append(" Headers : ").append(mResponseHeaders.toString());
+        } else {
+            builder.append("null");
+        }
+        return  builder.toString();
+    }
 }

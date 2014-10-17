@@ -8,7 +8,7 @@ import com.droidutils.http.HttpURLConnectionClient;
 /**
  * Created by Misha on 07.09.2014.
  */
-public class HttpRequest<T> {
+public class HttpRequest {
 
     private HttpHeaders mHttpHeaders;
     private String mUrl;
@@ -28,7 +28,7 @@ public class HttpRequest<T> {
         mRequestKey = builder.mRequestKey;
     }
 
-    public static class Builder<T> {
+    public static class Builder {
 
         private HttpHeaders mHttpHeaders;
         private String mUrl;
