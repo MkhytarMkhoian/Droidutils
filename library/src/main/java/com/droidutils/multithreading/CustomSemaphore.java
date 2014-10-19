@@ -29,7 +29,11 @@ public class CustomSemaphore {
     public void release(int taskTag) throws InterruptedException {
 
         if (mRunningTask.containsKey(taskTag)) {
-            mRunningTask.remove(taskTag).release();
+            mRunningTask.get(taskTag).release();
         }
+    }
+
+    public void clear(){
+        mRunningTask.clear();
     }
 }

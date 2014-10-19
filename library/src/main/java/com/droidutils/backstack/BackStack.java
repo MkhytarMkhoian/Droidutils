@@ -19,7 +19,7 @@ import java.util.Set;
  */
 public class BackStack {
 
-    public static final int BACK_BUTTON = 0;
+    public static final int BACK_BUTTON = 1;
 
     private static BackStack sInstance = null;
 

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Misha on 07.09.2014.
+ * Created by Mkhitar on 07.09.2014.
  */
 public class HttpHeaders {
 

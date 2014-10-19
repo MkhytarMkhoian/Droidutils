@@ -1,12 +1,12 @@
 package com.droidutils.test.backstack;
 
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 
 import com.droidutils.backstack.BackStack;
 import com.droidutils.test.R;
 
-public class BackStackExampleActivity extends ActionBarActivity {
+public class BackStackExampleActivity extends Activity {
 
     private BackStack mBackStack = BackStack.getInstance();
 
@@ -16,7 +16,7 @@ public class BackStackExampleActivity extends ActionBarActivity {
         setContentView(R.layout.activity_back_stack);
 
         getFragmentManager().beginTransaction().replace(R.id.container, new Fragment1(), Fragment1.class.getName())
-                .addToBackStack(Fragment1.class.getName())
+                .addToBackStack(null)
                 .commit();
     }
 
@@ -28,7 +28,7 @@ public class BackStackExampleActivity extends ActionBarActivity {
 
     @Override
     public void onBackPressed() {
-        mBackStack.onBackPressed(getFragmentManager(), R.id.container);
+       mBackStack.onBackPressed(getFragmentManager(), R.id.container);
     }
 
 

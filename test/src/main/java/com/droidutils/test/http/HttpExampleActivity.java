@@ -1,8 +1,8 @@
 package com.droidutils.test.http;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -20,9 +20,10 @@ import com.droidutils.multithreading.ThreadExecutor;
 import com.droidutils.test.R;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-public class HttpExampleActivity extends ActionBarActivity implements View.OnClickListener {
+public class HttpExampleActivity extends Activity implements View.OnClickListener {
 
     public static final int REQUEST_ONE = 1;
     public static final int REQUEST_TWO = 2;
@@ -194,7 +195,7 @@ public class HttpExampleActivity extends ActionBarActivity implements View.OnCli
             }
         });
 
-        ThreadExecutor.doTaskWithInterval(new Runnable() {
+        ScheduledFuture<?> scheduledFuture = ThreadExecutor.doTaskWithInterval(new Runnable() {
             @Override
             public void run() {
                 Log.e("doTaskWithInterval", "Hello world With Interval");

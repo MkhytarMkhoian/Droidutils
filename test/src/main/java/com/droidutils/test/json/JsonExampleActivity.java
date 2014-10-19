@@ -1,6 +1,6 @@
 package com.droidutils.test.json;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
@@ -8,7 +8,7 @@ import android.widget.TextView;
 import com.droidutils.jsonparser.JsonConverter;
 import com.droidutils.test.R;
 
-public class JsonExampleActivity extends ActionBarActivity {
+public class JsonExampleActivity extends Activity {
 
     private TextView mJsonText;
     private TextView mObjectWithJsonData;
@@ -24,10 +24,10 @@ public class JsonExampleActivity extends ActionBarActivity {
                 "\t\"type\": \"object\",\n" +
                 "\t\"properties\": [\n" +
                 "\t\t{\n" +
-                "\t\t\t\"Name\": \"1\"\n" +
+                "\t\t\t\"Name\": \"David\"\n" +
                 "\t\t},\n" +
                 "\t\t{\n" +
-                "\t\t\t\"Name\": \"2\"\n" +
+                "\t\t\t\"Name\": \"Mike\"\n" +
                 "\t\t}\n" +
                 "\t\t\n" +
                 "\t],\n" +

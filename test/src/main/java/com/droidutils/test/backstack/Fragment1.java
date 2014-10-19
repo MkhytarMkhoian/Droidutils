@@ -17,8 +17,6 @@ import com.droidutils.test.R;
  */
 public class Fragment1 extends Fragment implements BackButtonListener {
 
-    private BackStack mBackStack = BackStack.getInstance();
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
@@ -32,6 +30,7 @@ public class Fragment1 extends Fragment implements BackButtonListener {
         switch (flag) {
 
             case BackStack.BACK_BUTTON:
+
                 AlertDialog dialog = new AlertDialog.Builder(getActivity())
                         .setMessage("Are you sure?")
                         .setTitle("Exit")

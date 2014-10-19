@@ -11,5 +11,6 @@
     <string name="test_multi_threading">Test MultiThreading</string>
     <string name="used_cache_button">Used Cache</string>
     <string name="used_request_with_limit_button">Used Request With Limit</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>
