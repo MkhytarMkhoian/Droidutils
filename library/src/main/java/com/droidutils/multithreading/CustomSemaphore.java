@@ -1,5 +1,7 @@
 package com.droidutils.multithreading;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
@@ -25,6 +27,8 @@ public class CustomSemaphore {
         }
         semaphore.acquire();
         mRunningTask.put(taskTag, semaphore);
+
+ //       Log.e("CustomSemaphore acquire size", mRunningTask.size() + "");
     }
 
     public void release(String taskTag) throws InterruptedException {
@@ -32,6 +36,7 @@ public class CustomSemaphore {
         if (mRunningTask.containsKey(taskTag)) {
             mRunningTask.remove(taskTag).release();
         }
+ //       Log.e("CustomSemaphore release size", mRunningTask.size() + "");
     }
 
     public void clear(){

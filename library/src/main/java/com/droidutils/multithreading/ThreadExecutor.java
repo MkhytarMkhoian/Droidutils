@@ -15,11 +15,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class ThreadExecutor {
 
-    public static final int DEFAULT_THREADS = 10;
+    public static final int DEFAULT_NETWORK_THREADS = 10;
     public static final int DEFAULT_SCHEDULED_THREADS = 5;
 
     private static ExecutorService mThreadPoolExecutor = Executors.newCachedThreadPool();
-    private static ExecutorService mNetworkExecutor = Executors.newFixedThreadPool(DEFAULT_THREADS);
+    private static ExecutorService mNetworkExecutor = Executors.newFixedThreadPool(DEFAULT_NETWORK_THREADS);
     private static ScheduledExecutorService mScheduledExecutorService = Executors.newScheduledThreadPool(DEFAULT_SCHEDULED_THREADS);
 
     public static <R> void notifyStartListener(final ExecutorListener<R> listener) {

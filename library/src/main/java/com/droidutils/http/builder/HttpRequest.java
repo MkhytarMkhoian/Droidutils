@@ -35,7 +35,7 @@ public class HttpRequest {
         private HttpHeaders mHttpHeaders;
         private String mUrl;
         private HttpBody mHttpBody;
-        private HttpMethod mHttpMethod;
+        private HttpMethod mHttpMethod = HttpMethod.GET;
         private int mReadTimeout = HttpURLConnectionClient.READ_TIMEOUT;
         private int mConnectTimeout = HttpURLConnectionClient.CONNECT_TIMEOUT;
         private String mRequestKey = DEFAULT_KEY;

@@ -21,7 +21,6 @@ public class MainActivity extends Activity {
 
     public static final String HTTP = "Http";
     public static final String JSON = "Json";
-    public static final String BACK_STACK = "BackStack";
     public static final String TEXT = "text";
 
     private ListView mListView;
@@ -31,7 +30,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String[] texts = {HTTP, JSON, BACK_STACK};
+        String[] texts = {HTTP, JSON};
 
         List<Map<String, Object>> data = new ArrayList<Map<String, Object>>(
                 texts.length);

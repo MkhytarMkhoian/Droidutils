@@ -139,7 +139,8 @@ public class HttpURLConnectionClient implements HttpConnection {
 
         try {
 
-            if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
+            if (!request.getRequestKey().equals(HttpRequest.DEFAULT_KEY)
+                    && !mRequestManager.checkRequestLimit(request.getRequestKey())) {
                 return getFromCache(request.getRequestKey(), cache);
             }
 
@@ -172,7 +173,8 @@ public class HttpURLConnectionClient implements HttpConnection {
 
         try {
 
-            if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
+            if (!request.getRequestKey().equals(HttpRequest.DEFAULT_KEY)
+                    && !mRequestManager.checkRequestLimit(request.getRequestKey())) {
                 return getFromCache(request.getRequestKey(), cache);
             }
 
@@ -190,9 +192,6 @@ public class HttpURLConnectionClient implements HttpConnection {
 
             if (request.isHaveBody()) {
                 mUrlConnection.setFixedLengthStreamingMode(request.getHttpBody().convertToByteArray().length);
-            }
-
-            if (request.isHaveBody()) {
                 OutputStream out = new DataOutputStream(new BufferedOutputStream(mUrlConnection.getOutputStream()));
                 out.write(request.getHttpBody().convertToByteArray());
                 out.flush();
@@ -220,7 +219,8 @@ public class HttpURLConnectionClient implements HttpConnection {
 
         try {
 
-            if (!mRequestManager.checkRequestLimit(request.getRequestKey())) {
+            if (!request.getRequestKey().equals(HttpRequest.DEFAULT_KEY)
+                    && !mRequestManager.checkRequestLimit(request.getRequestKey())) {
                 return getFromCache(request.getRequestKey(), cache);
             }
 
