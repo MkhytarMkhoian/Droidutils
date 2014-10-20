@@ -5,6 +5,6 @@ package com.droidutils.http.cache;
  */
 public interface Cache<T> {
 
-    public T syncCache(T data, int requestKey);
-    public T readFromCache(int requestKey);
+    public T syncCache(T data, String requestKey);
+    public T readFromCache(String requestKey);
 }

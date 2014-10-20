@@ -10,13 +10,15 @@ import com.droidutils.http.HttpURLConnectionClient;
  */
 public class HttpRequest {
 
+    public static final String DEFAULT_KEY = "default_key";
+
     private HttpHeaders mHttpHeaders;
     private String mUrl;
     private HttpBody mHttpBody;
     private HttpMethod mHttpMethod;
     private int mReadTimeout;
     private int mConnectTimeout;
-    private int mRequestKey;
+    private String mRequestKey;
 
     private HttpRequest(Builder builder) {
         mHttpHeaders = builder.mHttpHeaders;
@@ -36,7 +38,7 @@ public class HttpRequest {
         private HttpMethod mHttpMethod;
         private int mReadTimeout = HttpURLConnectionClient.READ_TIMEOUT;
         private int mConnectTimeout = HttpURLConnectionClient.CONNECT_TIMEOUT;
-        private int mRequestKey;
+        private String mRequestKey = DEFAULT_KEY;
 
         public Builder() {
 
@@ -72,7 +74,7 @@ public class HttpRequest {
             return this;
         }
 
-        public Builder setRequestKey(int requestKey) {
+        public Builder setRequestKey(String requestKey) {
             this.mRequestKey = requestKey;
             return this;
         }
@@ -106,7 +108,7 @@ public class HttpRequest {
         return mConnectTimeout;
     }
 
-    public int getRequestKey() {
+    public String getRequestKey() {
         return mRequestKey;
     }
 

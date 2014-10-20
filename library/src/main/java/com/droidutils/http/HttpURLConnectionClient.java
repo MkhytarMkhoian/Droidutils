@@ -22,10 +22,7 @@ import java.net.CookiePolicy;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Semaphore;
 
 /**
  * Created by Misha on 07.09.2014.
@@ -46,7 +43,7 @@ public class HttpURLConnectionClient implements HttpConnection {
         mSemaphore = new CustomSemaphore();
     }
 
-    public void setRequestLimit(int requestKey, long limit) {
+    public void setRequestLimit(String requestKey, long limit) {
         mRequestManager.setRequestLimit(requestKey, limit);
     }
 
@@ -114,7 +111,7 @@ public class HttpURLConnectionClient implements HttpConnection {
         return response.toString();
     }
 
-    private <T> HttpResponse<T> syncWithCache(HttpResponse<T> response, Cache<T> cache, int requestKey) throws Exception {
+    private <T> HttpResponse<T> syncWithCache(HttpResponse<T> response, Cache<T> cache, String requestKey) throws Exception {
 
         if (cache != null) {
             return new HttpResponse<T>(cache.syncCache(response.getBody(), requestKey), response.getHeaders());
@@ -123,12 +120,12 @@ public class HttpURLConnectionClient implements HttpConnection {
         return response;
     }
 
-    private <T> HttpResponse<T> getFromCache(int requestKey, Cache<T> cache) throws RequestLimitException {
+    private <T> HttpResponse<T> getFromCache(String requestKey, Cache<T> cache) throws RequestLimitException {
         if (cache != null) {
             T response = cache.readFromCache(requestKey);
             return new HttpResponse<T>(response, null);
         }
-        throw new RequestLimitException();
+        return new HttpResponse<T>(null, null);
     }
 
     public <T> HttpResponse get(HttpRequest request, Class<T> responseType) throws Exception {

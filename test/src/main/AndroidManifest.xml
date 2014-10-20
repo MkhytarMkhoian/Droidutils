@@ -19,10 +19,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".backstack.BackStackExampleActivity"
-            android:label="@string/title_activity_back_stack" >
-        </activity>
-        <activity
             android:name=".http.HttpExampleActivity"
             android:label="@string/title_activity_http_example" >
         </activity>

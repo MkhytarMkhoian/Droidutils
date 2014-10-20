@@ -9,7 +9,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import com.droidutils.test.backstack.BackStackExampleActivity;
 import com.droidutils.test.http.HttpExampleActivity;
 import com.droidutils.test.json.JsonExampleActivity;
 
@@ -57,9 +56,7 @@ public class MainActivity extends Activity {
                 String text = ((TextView) view).getText().toString();
                 Intent intent = null;
 
-                if (text.equals(BACK_STACK)){
-                    intent = new Intent(MainActivity.this, BackStackExampleActivity.class);
-                } else if (text.equals(HTTP)){
+                if (text.equals(HTTP)){
                     intent = new Intent(MainActivity.this, HttpExampleActivity.class);
                 } else if (text.equals(JSON)){
                     intent = new Intent(MainActivity.this, JsonExampleActivity.class);

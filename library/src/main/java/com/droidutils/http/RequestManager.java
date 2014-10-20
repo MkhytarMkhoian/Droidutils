@@ -10,19 +10,19 @@ import java.util.Map;
  */
 public class RequestManager {
 
-    private Map<Integer, Long> mRequestLimit;
-    private Map<Integer, Long> mRequestTimestamp;
+    private Map<String, Long> mRequestLimit;
+    private Map<String, Long> mRequestTimestamp;
 
     public RequestManager() {
-        mRequestLimit = new HashMap<Integer, Long>();
-        mRequestTimestamp = new HashMap<Integer, Long>();
+        mRequestLimit = new HashMap<String, Long>();
+        mRequestTimestamp = new HashMap<String, Long>();
     }
 
-    public void setRequestLimit(int requestKey, long limit) {
+    public void setRequestLimit(String requestKey, long limit) {
         mRequestLimit.put(requestKey, limit);
     }
 
-    public boolean checkRequestLimit(int requestKey) {
+    public boolean checkRequestLimit(String requestKey) {
         Long limit = mRequestLimit.get(requestKey);
         if (limit == null) {
             resetRequestLimit(requestKey);
@@ -41,7 +41,7 @@ public class RequestManager {
         return true;
     }
 
-    public void resetRequestLimit(int requestKey) {
+    public void resetRequestLimit(String requestKey) {
         mRequestTimestamp.put(requestKey, System.currentTimeMillis());
     }
 }

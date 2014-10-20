@@ -9,27 +9,28 @@ import java.util.concurrent.Semaphore;
  */
 public class CustomSemaphore {
 
-    private Map<Integer, Semaphore> mRunningTask;
+    private Map<String, Semaphore> mRunningTask;
 
     public CustomSemaphore(){
-        mRunningTask = new HashMap<Integer, Semaphore>();
+        mRunningTask = new HashMap<String, Semaphore>();
     }
 
-    public void acquire(int taskTag) throws InterruptedException {
+    public void acquire(String taskTag) throws InterruptedException {
 
+        Semaphore semaphore = null;
         if (!mRunningTask.containsKey(taskTag)) {
-            final Semaphore semaphore = new Semaphore(1);
-            mRunningTask.put(taskTag, semaphore);
-            semaphore.acquire();
+            semaphore = new Semaphore(1);
         } else {
-            mRunningTask.get(taskTag).acquire();
+            semaphore = mRunningTask.get(taskTag);
         }
+        semaphore.acquire();
+        mRunningTask.put(taskTag, semaphore);
     }
 
-    public void release(int taskTag) throws InterruptedException {
+    public void release(String taskTag) throws InterruptedException {
 
         if (mRunningTask.containsKey(taskTag)) {
-            mRunningTask.get(taskTag).release();
+            mRunningTask.remove(taskTag).release();
         }
     }
 

@@ -25,8 +25,8 @@ import java.util.concurrent.TimeUnit;
 
 public class HttpExampleActivity extends Activity implements View.OnClickListener {
 
-    public static final int REQUEST_ONE = 1;
-    public static final int REQUEST_TWO = 2;
+    public static final String REQUEST_ONE = "REQUEST_ONE";
+    public static final String REQUEST_TWO = "REQUEST_TWO";
 
     private ProgressDialog mProgressDialog;
     private HttpExecutor mHttpExecutor;
@@ -133,13 +133,13 @@ public class HttpExampleActivity extends Activity implements View.OnClickListene
 
                     return mHttpExecutor.execute(request, TestResponse.class, new Cache<TestResponse>() {
                         @Override
-                        public TestResponse syncCache(TestResponse data, int requestKey) {
+                        public TestResponse syncCache(TestResponse data, String requestKey) {
                             // write data to cache and return this data from cache
                             return data;
                         }
 
                         @Override
-                        public TestResponse readFromCache(int requestKey) {
+                        public TestResponse readFromCache(String requestKey) {
                             TestResponse response = new TestResponse();
                             response.hello = "hello from cache";
                             return response;
