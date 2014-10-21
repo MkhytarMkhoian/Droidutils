@@ -79,7 +79,7 @@ public class HttpExampleActivity extends Activity implements View.OnClickListene
 
     private void testRequestLimit() {
 
-        for (int i = 0; i < 2; i++){
+        for (int i = 0; i < 2; i++) {
 
             ThreadExecutor.doNetworkTaskAsync(new Callable<HttpResponse>() {
                 @Override
@@ -90,7 +90,12 @@ public class HttpExampleActivity extends Activity implements View.OnClickListene
                     HttpRequest request = new HttpRequest.Builder()
                             .setRequestKey(REQUEST_TWO)
                             .setHttpMethod(HttpMethod.GET)
-                            .setUrl(url).build();
+                            .setUrl(url)
+//                            .setHttpBody()
+//                            .setHttpHeaders()
+//                            .setReadTimeout()
+//                            .setConnectTimeout()
+                            .build();
 
                     return mHttpExecutor.execute(request, TestResponse.class);
 

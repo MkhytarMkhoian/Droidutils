@@ -19,7 +19,11 @@ public class Url {
         }
 
         public Builder addParameter(String key, String value){
-            mUrlBuilder.append("&").append(key).append("=").append(value);
+
+            if (mUrlBuilder.charAt(mUrlBuilder.length() - 1) != '?'){
+                mUrlBuilder.append("&");
+            }
+            mUrlBuilder.append(key).append("=").append(value);
             return this;
         }
 
