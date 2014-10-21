@@ -8,7 +8,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.droidutils.http.HttpBody;
 import com.droidutils.http.HttpExecutor;
+import com.droidutils.http.HttpHeader;
+import com.droidutils.http.HttpHeaders;
 import com.droidutils.http.HttpMethod;
 import com.droidutils.http.HttpURLConnectionClient;
 import com.droidutils.http.builder.HttpRequest;
@@ -91,10 +94,6 @@ public class HttpExampleActivity extends Activity implements View.OnClickListene
                             .setRequestKey(REQUEST_TWO)
                             .setHttpMethod(HttpMethod.GET)
                             .setUrl(url)
-//                            .setHttpBody()
-//                            .setHttpHeaders()
-//                            .setReadTimeout()
-//                            .setConnectTimeout()
                             .build();
 
                     return mHttpExecutor.execute(request, TestResponse.class);

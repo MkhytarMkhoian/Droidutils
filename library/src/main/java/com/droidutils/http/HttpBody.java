@@ -2,6 +2,7 @@ package com.droidutils.http;
 
 import com.droidutils.jsonparser.JsonConverter;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 /**
@@ -10,25 +11,36 @@ import java.net.URLEncoder;
 public class HttpBody<T> {
 
     private T mBody;
+    private String mJsonBody;
     private JsonConverter mJsonConverter;
 
-    public HttpBody(T body){
+    public HttpBody(T body) throws Exception {
         mBody = body;
         mJsonConverter = new JsonConverter();
+        mJsonBody = mJsonConverter.convertToJsonString(mBody);
     }
 
-    public byte[] convertToByteArray() throws Exception {
+    public byte[] convertToByteArray() {
 
-        return mJsonConverter.convertToJsonString(mBody).getBytes(HttpConnection.CHARSET);
+        try {
+            return mJsonBody.getBytes(HttpConnection.CHARSET);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public String convertToString(){
 
         try {
-            return URLEncoder.encode(mJsonConverter.convertToJsonString(mBody), HttpConnection.CHARSET);
+            return URLEncoder.encode(mJsonBody, HttpConnection.CHARSET);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public T getBody(){
+        return mBody;
     }
 }
