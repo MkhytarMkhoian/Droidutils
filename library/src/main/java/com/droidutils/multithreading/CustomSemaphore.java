@@ -4,6 +4,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -14,7 +15,7 @@ public class CustomSemaphore {
     private Map<String, Semaphore> mRunningTask;
 
     public CustomSemaphore(){
-        mRunningTask = new HashMap<String, Semaphore>();
+        mRunningTask = new ConcurrentHashMap<String, Semaphore>();
     }
 
     public void acquire(String taskTag) throws InterruptedException {
