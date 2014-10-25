@@ -1,8 +1,5 @@
 package com.droidutils.multithreading;
 
-import android.util.Log;
-
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
