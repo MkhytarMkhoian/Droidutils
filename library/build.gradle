@@ -1,24 +1,29 @@
 apply plugin: 'com.android.library'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 android {
-    compileSdkVersion 19
+    compileSdkVersion 22
     buildToolsVersion '20.0.0'
 
     defaultConfig {
-        applicationId "com.droidutils"
         minSdkVersion 11
-        targetSdkVersion 19
+        targetSdkVersion 22
         versionCode 1
         versionName "1.0"
     }
     buildTypes {
         release {
-            runProguard false
+            minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
-dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+repositories {
+    mavenLocal()
+    mavenCentral()
 }
+
+
+

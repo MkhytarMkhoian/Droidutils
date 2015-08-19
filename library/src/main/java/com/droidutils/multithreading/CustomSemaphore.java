@@ -1,7 +1,7 @@
 package com.droidutils.multithreading;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -11,13 +11,13 @@ public class CustomSemaphore {
 
     private Map<String, Semaphore> mRunningTask;
 
-    public CustomSemaphore(){
-        mRunningTask = new ConcurrentHashMap<String, Semaphore>();
+    public CustomSemaphore() {
+        mRunningTask = new HashMap<String, Semaphore>();
     }
 
-    public void acquire(String taskTag) throws InterruptedException {
+    public synchronized void acquire(String taskTag) throws InterruptedException {
 
-        Semaphore semaphore = null;
+        Semaphore semaphore;
         if (!mRunningTask.containsKey(taskTag)) {
             semaphore = new Semaphore(1);
         } else {
@@ -26,7 +26,7 @@ public class CustomSemaphore {
         semaphore.acquire();
         mRunningTask.put(taskTag, semaphore);
 
- //       Log.e("CustomSemaphore acquire size", mRunningTask.size() + "");
+        //       Log.e("CustomSemaphore acquire size", mRunningTask.size() + "");
     }
 
     public void release(String taskTag) throws InterruptedException {
@@ -34,10 +34,10 @@ public class CustomSemaphore {
         if (mRunningTask.containsKey(taskTag)) {
             mRunningTask.remove(taskTag).release();
         }
- //       Log.e("CustomSemaphore release size", mRunningTask.size() + "");
+        //       Log.e("CustomSemaphore release size", mRunningTask.size() + "");
     }
 
-    public void clear(){
+    public void clear() {
         mRunningTask.clear();
     }
 }
