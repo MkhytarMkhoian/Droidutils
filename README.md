@@ -2,6 +2,7 @@ Droidutils
 ==========
 
 This library contains utils to work with HTTP, JSON and multithreading.
+Habrahabr article  https://habrahabr.ru/post/241415/
 
 <h3>JSON</h3>
 
