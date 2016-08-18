@@ -5,7 +5,6 @@ import com.droidutils.http.builder.HttpResponse;
 import com.droidutils.http.cache.Cache;
 import com.droidutils.http.exception.RequestLimitException;
 import com.droidutils.jsonparser.JsonConverter;
-import com.droidutils.multithreading.CustomSemaphore;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
